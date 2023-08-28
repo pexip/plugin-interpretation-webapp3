@@ -1,0 +1,23 @@
+{
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
+  "extends": [
+    "standard-with-typescript"
+  ],
+  "overrides": [{
+    "files": [
+      "./src/**/*.ts",
+      "./vite.config.js"
+    ]
+  }],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "project": ["./tsconfig.json"]
+  },
+  "rules": {
+  },
+  "ignorePatterns": ["dist"]
+}
