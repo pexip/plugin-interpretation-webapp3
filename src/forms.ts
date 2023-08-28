@@ -1,4 +1,4 @@
-import { joinInterpreter } from './conference'
+import { joinInterpreter, makeCallWithPin } from './conference'
 import { config } from './config'
 import { getPlugin } from './plugin'
 
@@ -25,12 +25,20 @@ export const showPinForm = async (): Promise<void> => {
   const plugin = getPlugin()
 
   const input = await plugin.ui.showForm({
-    title: 'PIN required',
+    title: 'PIN Required',
     form: {
-      elements: undefined,
-      submitBtnTitle: ''
+      elements: {
+        pin: {
+          name: 'PIN',
+          type: 'password',
+          placeholder: 'Enter PIN',
+          isOptional: false
+        }
+      },
+      submitBtnTitle: 'Join'
     }
   })
+  await makeCallWithPin(input.pin)
 }
 
 const getLanguageOptions = (): any => {

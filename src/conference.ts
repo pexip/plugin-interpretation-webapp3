@@ -10,6 +10,7 @@ import {
   createInfinityClientSignals
 } from '@pexip/infinity'
 import { getUser } from './user'
+import { showPinForm } from './forms'
 
 let plugin: Plugin
 
@@ -36,6 +37,10 @@ export const joinInterpreter = async (code: string): Promise<void> => {
   }
 }
 
+export const makeCallWithPin = async (pin: string): Promise<void> => {
+  await makeCall(pin)
+}
+
 const getMediaStream = async (): Promise<MediaStream> => {
   let stream: MediaStream
   try {
@@ -53,14 +58,12 @@ const getMediaStream = async (): Promise<MediaStream> => {
 const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
   signals.onPinRequired.add(async ({ hasHostPin, hasGuestPin }) => {
     if (hasHostPin) {
-      // TODO: Show panel to introduce pin
-      const pin = '1234'
-      await makeCall(pin)
+      await showPinForm()
     }
   })
 }
 
-const makeCall = async (pin?: string): Promise<void> => {
+export const makeCall = async (pin?: string): Promise<void> => {
   const audioStream = await getMediaStream()
   try {
     await infinityClient.call({
@@ -78,7 +81,5 @@ const makeCall = async (pin?: string): Promise<void> => {
 }
 
 window.addEventListener('beforeunload', () => {
-  console.log('CLOSING')
-  console.log(infinityClient)
   infinityClient?.disconnect({ reason: 'Browser closed' }).catch((e) => { console.error(e) })
 })
