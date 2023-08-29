@@ -1,9 +1,8 @@
-interface Language {
-  code: string
-  name: string
-}
+import type { Language } from './language'
+import type { Role } from './role'
 
 interface Config {
+  role: Role
   languages: Language[]
 }
 

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/restrict-plus-operands */
 import { defineConfig } from 'vite'
 import mkcert from 'vite-plugin-mkcert'
+import react from '@vitejs/plugin-react'
 
 import viteConfig from './vite.json'
 
@@ -26,5 +27,8 @@ export default defineConfig({
       }
     }
   },
-  plugins: [mkcert()]
+  plugins: [
+    mkcert(),
+    react()
+  ]
 })

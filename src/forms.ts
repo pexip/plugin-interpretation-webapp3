@@ -1,6 +1,8 @@
-import { joinInterpreter, makeCallWithPin } from './conference'
 import { config } from './config'
+import { Interpretation } from './interpretation'
+import { getLanguageByCode } from './language'
 import { getPlugin } from './plugin'
+import { capitalizeFirstLetter } from './utils'
 
 export const showInterpreterForm = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -18,7 +20,10 @@ export const showInterpreterForm = async (): Promise<void> => {
       submitBtnTitle: 'Join'
     }
   })
-  await joinInterpreter(input.language)
+  const language = getLanguageByCode(input.language)
+  if (language != null) {
+    await Interpretation.join(language)
+  }
 }
 
 export const showPinForm = async (): Promise<void> => {
@@ -38,7 +43,14 @@ export const showPinForm = async (): Promise<void> => {
       submitBtnTitle: 'Join'
     }
   })
-  await makeCallWithPin(input.pin)
+  if (input.pin != null) {
+    const language = Interpretation.getCurrentLanguage()
+    if (language != null) {
+      await Interpretation.join(language, input.pin)
+    }
+  } else {
+    await Interpretation.leave()
+  }
 }
 
 const getLanguageOptions = (): any => {
@@ -47,8 +59,4 @@ const getLanguageOptions = (): any => {
     label: capitalizeFirstLetter(language.name)
   }))
   return options
-}
-
-const capitalizeFirstLetter = (value: string): string => {
-  return value.charAt(0).toUpperCase() + value.slice(1)
 }
