@@ -9,8 +9,4 @@ const root = document.getElementById('root')
 if (root == null) {
   throw new Error('Not found element with id=root')
 }
-ReactDOM.createRoot(root).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-)
+ReactDOM.createRoot(root).render(<App />)
