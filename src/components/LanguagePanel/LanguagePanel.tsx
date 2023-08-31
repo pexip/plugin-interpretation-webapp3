@@ -7,6 +7,7 @@ import { Interpretation } from '../../interpretation'
 import { showDisconnectPrompt } from '../../prompts'
 
 import './LanguagePanel.scss'
+import { showSelectMicForm } from '../../forms'
 
 interface LanguageIndicatorProps {
   languageName: string
@@ -16,7 +17,7 @@ interface LanguageIndicatorProps {
 export const LanguageIndicator = (props: LanguageIndicatorProps): JSX.Element => {
   const [audioMuted, setAudioMuted] = useState(false)
 
-  const handleClick = async (): Promise<void> => {
+  const handleMuteAudio = async (): Promise<void> => {
     await Interpretation.setAudioMuted(!audioMuted)
     setAudioMuted(!audioMuted)
   }
@@ -30,12 +31,12 @@ export const LanguageIndicator = (props: LanguageIndicatorProps): JSX.Element =>
       {props.role === Role.Interpreter &&
       <div className='Toolbar'>
         <Tooltip text={audioMuted ? 'Unmute microphone' : 'Mute microphone'} position='bottom'>
-          <Button modifier='square' onClick={() => { handleClick().catch((e) => { console.error(e) }) }} variant={audioMuted ? 'danger' : 'primary'}>
+          <Button modifier='square' onClick={() => { handleMuteAudio().catch((e) => { console.error(e) }) }} variant={audioMuted ? 'danger' : 'primary'}>
             <Icon source={audioMuted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
           </Button>
         </Tooltip>
         <Tooltip text='Change microphone' position='bottom'>
-          <Button modifier='square' onClick={() => { handleClick().catch((e) => { console.error(e) }) }} >
+          <Button modifier='square' onClick={() => { showSelectMicForm().catch((e) => { console.error(e) }) }} >
             <Icon source={IconTypes.IconSettings} />
           </Button>
         </Tooltip>

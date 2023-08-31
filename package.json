@@ -13,9 +13,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pexip/components": "^16.10.0",
-    "@pexip/infinity": "^17.0.0",
-    "@pexip/plugin-api": "17.7.0",
+    "@pexip/components": "^16.11.0",
+    "@pexip/infinity": "^17.1.0",
+    "@pexip/plugin-api": "18.0.0",
     "eslint-plugin-react": "^7.33.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -14,14 +14,17 @@ import { getMainConferenceAlias } from './conference'
 import { getUser } from './user'
 import { Role } from './role'
 
+const deviceIdStorageKey = 'PexInterpretation:deviceId'
+
 const clientSignals = createInfinityClientSignals([])
 const callSignals = createCallSignals([])
 const infinityClient = createInfinityClient(clientSignals, callSignals)
+const audio: HTMLAudioElement = new Audio()
 
 let handleChangeCallback: (language: Language | null) => void
 let currentLanguage: Language | null = null
 let signalsInitialized: boolean = false
-const audio: HTMLAudioElement = new Audio()
+let stream: MediaStream
 
 const registerOnChangeLanguageCallback = (callback: (language: Language | null) => void): void => {
   handleChangeCallback = callback
@@ -35,18 +38,18 @@ const join = async (language: Language, pin?: string): Promise<void> => {
     signalsInitialized = true
   }
   const role = config.role
-  const audioStream = await getMediaStream()
+  stream = await getMediaStream()
   try {
     await infinityClient.call({
       conferenceAlias: getMainConferenceAlias() + language.code,
       callType: role === Role.Interpreter ? ClientCallType.Audio : ClientCallType.Audio,
       bandwidth: 0,
       displayName: (getUser().displayName ?? getUser().uuid) + ' - Interpreter',
-      mediaStream: audioStream,
+      mediaStream: stream,
       pin
     })
   } catch (e) {
-    audioStream.getTracks().forEach((track) => { track.stop() })
+    stopStream(stream)
     throw e
   }
 }
@@ -57,6 +60,13 @@ const getCurrentLanguage = (): Language | null => {
 
 const setAudioMuted = async (mute: boolean): Promise<void> => {
   await infinityClient.mute({ mute })
+}
+
+const setAudioInputDevice = async (deviceId: string): Promise<void> => {
+  localStorage.setItem(deviceIdStorageKey, deviceId)
+  stopStream(stream)
+  stream = await getMediaStream(deviceId)
+  infinityClient.setStream(stream)
 }
 
 const leave = async (): Promise<void> => {
@@ -81,19 +91,18 @@ const initializeInfinityCallSignals = (signals: CallSignals): void => {
   signals.onRemoteStream.add(async (stream) => {
     audio.autoplay = true
     audio.srcObject = stream
-    console.log(audio)
   })
 }
 
-const getMediaStream = async (): Promise<MediaStream> => {
+const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
   let stream: MediaStream
+  if (deviceId == null) {
+    deviceId = localStorage.getItem(deviceIdStorageKey) ?? undefined
+  }
+  const audio = deviceId != null ? { deviceId } : true
   try {
-    // TODO: Implement media selector
-    const devices = await navigator.mediaDevices.enumerateDevices()
     stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        deviceId: devices[1].deviceId
-      },
+      audio,
       video: false
     })
     const audioTracks = stream.getAudioTracks()
@@ -106,10 +115,15 @@ const getMediaStream = async (): Promise<MediaStream> => {
   return stream
 }
 
+const stopStream = (stream: MediaStream): void => {
+  stream.getTracks().forEach((track) => { track.stop() })
+}
+
 export const Interpretation = {
   registerOnChangeLanguageCallback,
   join,
   setAudioMuted,
+  setAudioInputDevice,
   getCurrentLanguage,
   leave
 }
