@@ -7,7 +7,9 @@
     "start": "vite",
     "build": "vite build",
     "test": "jest --detectOpenHandles",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "interpreter": "ROLE=interpreter vite",
+    "listener": "ROLE=listener vite"
   },
   "keywords": [],
   "author": "",

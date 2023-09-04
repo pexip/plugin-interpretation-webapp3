@@ -5,17 +5,26 @@ import react from '@vitejs/plugin-react'
 
 import viteConfig from './vite.json'
 
+const role = process.env.ROLE
+
+let config = viteConfig.interpreter
+
+if (role === 'listener') {
+  config = viteConfig.listener
+}
+
 export default defineConfig({
   base: './',
   build: {
     target: 'esnext'
   },
+  publicDir: config.publicDir,
   server: {
     https: true,
-    open: viteConfig.brandingPath + '/',
-    port: 5173,
+    open: config.brandingPath + '/',
+    port: config.port,
     proxy: {
-      [viteConfig.brandingPath]: {
+      [config.brandingPath]: {
         target: viteConfig.infinityUrl,
         changeOrigin: true,
         secure: false
