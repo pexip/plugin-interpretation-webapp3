@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { registerPlugin } from '@pexip/plugin-api'
 import { setPlugin } from './plugin'
 import { initializeEvents } from './events'
-import { initializeButton } from './button'
+import { initializeButton, setButtonActive } from './button'
 import { initializeIFrame } from './iframe'
 import { LanguageIndicator } from './components/LanguagePanel/LanguagePanel'
 import { ThemeProvider } from '@pexip/components'
@@ -29,7 +29,6 @@ export const App = (): JSX.Element => {
       initializeIFrame()
 
       Interpretation.registerOnChangeLanguageCallback((language) => {
-        setLanguage(language)
         if (language != null) {
           if (config.role === Role.Interpreter) {
             muteMainRoomAudio()
@@ -40,10 +39,12 @@ export const App = (): JSX.Element => {
           if (config.role === Role.Listener) {
             setMainRoomVolume(1)
           }
+          plugin.ui.showToast({ message: 'Left interpretation room' }).catch((e) => { console.error(e) })
         }
+        setButtonActive(language != null).catch((e) => { console.error(e) })
+        setLanguage(language)
       })
     }
-
     bootStrap().catch((e) => { console.error(e) })
   }, [])
 

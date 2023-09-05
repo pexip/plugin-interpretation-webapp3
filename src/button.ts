@@ -4,15 +4,31 @@ import { getPlugin } from './plugin'
 import { showDisconnectPrompt } from './prompts'
 import { isSameDomain } from './utils'
 
+import type { Button, ToolbarButtonPayload } from '@pexip/plugin-api'
+
+let button: Button<'toolbar'>
+
+const tooltipActive = 'Join interpretation'
+const tooltipInactive = 'Leave interpretation'
+
+const buttonPayload: ToolbarButtonPayload = {
+  position: 'toolbar',
+  icon: 'IconSupport',
+  tooltip: tooltipActive,
+  roles: ['chair', 'guest']
+}
+
 export const initializeButton = async (): Promise<void> => {
   const plugin = getPlugin()
-  const button = await plugin.ui.addButton({
-    position: 'toolbar',
-    roles: ['chair', 'guest'],
-    icon: 'IconSupport',
-    tooltip: 'Open Interpretation'
-  })
+  button = await plugin.ui.addButton(buttonPayload)
   button.onClick.add(handleOnClick)
+}
+
+export const setButtonActive = async (active: boolean): Promise<void> => {
+  await button.update(Object.assign(buttonPayload, {
+    isActive: active,
+    tooltip: active ? tooltipActive : tooltipInactive
+  }))
 }
 
 const handleOnClick = async (): Promise<void> => {

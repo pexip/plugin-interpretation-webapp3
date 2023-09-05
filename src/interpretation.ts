@@ -98,7 +98,7 @@ const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
       await showPinForm()
     }
   })
-  signals.onMe.add(() => {
+  signals.onMe.add(async () => {
     handleChangeCallback(currentLanguage)
   })
 }
