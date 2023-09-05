@@ -80,6 +80,8 @@ export const showSelectMicForm = async (): Promise<void> => {
   })
   if (input.device != null) {
     await Interpretation.setAudioInputDevice(input.device)
+    const deviceLabel = audioInputDevices.find((device) => device.deviceId === input.device)?.label ?? 'unknown'
+    plugin.ui.showToast({ message: `Changed microphone to "${deviceLabel}"` }).catch((e) => { console.error(e) })
   }
 }
 

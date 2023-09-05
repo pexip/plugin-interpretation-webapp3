@@ -19,7 +19,19 @@ export const showDisconnectPrompt = async (): Promise<void> => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      Interpretation.leave()
+      await Interpretation.leave()
+    }
+  })
+}
+
+export const showErrorPrompt = async (message: string): Promise<void> => {
+  const plugin = getPlugin()
+
+  await plugin.ui.showPrompt({
+    title: 'Error',
+    description: message,
+    prompt: {
+      primaryAction: 'Close'
     }
   })
 }

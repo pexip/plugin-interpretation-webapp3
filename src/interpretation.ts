@@ -13,6 +13,7 @@ import { config } from './config'
 import { getMainConferenceAlias } from './conference'
 import { getUser } from './user'
 import { Role } from './role'
+import { showErrorPrompt } from './prompts'
 
 const deviceIdStorageKey = 'PexInterpretation:deviceId'
 
@@ -94,12 +95,27 @@ const leave = async (): Promise<void> => {
 
 const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
   signals.onPinRequired.add(async ({ hasHostPin, hasGuestPin }) => {
-    if (hasHostPin) {
+    const role = config.role
+    if (role === Role.Interpreter && hasHostPin) {
       await showPinForm()
     }
+    if (role === Role.Listener) {
+      if (hasGuestPin) {
+        await showPinForm()
+      } else {
+        if (currentLanguage != null) {
+          const pin = ' '
+          await join(currentLanguage, pin)
+        }
+      }
+    }
+    // TODO: What to do when no PIN for guest
   })
   signals.onMe.add(async () => {
     handleChangeCallback(currentLanguage)
+  })
+  signals.onError.add(async ({ error, errorCode }): Promise<void> => {
+    await showErrorPrompt(error)
   })
 }
 
