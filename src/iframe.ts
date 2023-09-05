@@ -9,7 +9,7 @@ export const initializeIFrame = (): void => {
     style.display = 'block'
     style.margin = 'auto'
     style.width = '400px'
-    style.height = '150px'
+    style.height = '115px'
     style.border = '0'
   }
   // Take out overflow from body

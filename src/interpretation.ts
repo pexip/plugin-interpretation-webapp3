@@ -24,7 +24,7 @@ const audio: HTMLAudioElement = new Audio()
 let handleChangeCallback: (language: Language | null) => void
 let currentLanguage: Language | null = null
 let signalsInitialized: boolean = false
-let stream: MediaStream
+let mediaStream: MediaStream | undefined
 
 const registerOnChangeLanguageCallback = (callback: (language: Language | null) => void): void => {
   handleChangeCallback = callback
@@ -37,19 +37,35 @@ const join = async (language: Language, pin?: string): Promise<void> => {
     initializeInfinityCallSignals(callSignals)
     signalsInitialized = true
   }
+
   const role = config.role
-  stream = await getMediaStream()
+  const username = getUser().displayName ?? getUser().uuid
+  let roleTag: string
+  let callType: ClientCallType
+
+  if (role === Role.Interpreter) {
+    roleTag = 'Interpreter'
+    mediaStream = await getMediaStream()
+    callType = ClientCallType.AudioSendOnly
+  } else {
+    roleTag = 'Listener'
+    mediaStream = undefined
+    callType = ClientCallType.AudioRecvOnly
+  }
+
+  const displayName = `${username} - ${roleTag}`
+
   try {
     await infinityClient.call({
       conferenceAlias: getMainConferenceAlias() + language.code,
-      callType: role === Role.Interpreter ? ClientCallType.Audio : ClientCallType.Audio,
       bandwidth: 0,
-      displayName: (getUser().displayName ?? getUser().uuid) + ' - Interpreter',
-      mediaStream: stream,
+      callType,
+      displayName,
+      mediaStream,
       pin
     })
   } catch (e) {
-    stopStream(stream)
+    stopStream(mediaStream)
     throw e
   }
 }
@@ -64,9 +80,9 @@ const setAudioMuted = async (mute: boolean): Promise<void> => {
 
 const setAudioInputDevice = async (deviceId: string): Promise<void> => {
   localStorage.setItem(deviceIdStorageKey, deviceId)
-  stopStream(stream)
-  stream = await getMediaStream(deviceId)
-  infinityClient.setStream(stream)
+  stopStream(mediaStream)
+  mediaStream = await getMediaStream(deviceId)
+  infinityClient.setStream(mediaStream)
 }
 
 const leave = async (): Promise<void> => {
@@ -115,8 +131,8 @@ const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
   return stream
 }
 
-const stopStream = (stream: MediaStream): void => {
-  stream.getTracks().forEach((track) => { track.stop() })
+const stopStream = (stream: MediaStream | undefined): void => {
+  stream?.getTracks().forEach((track) => { track.stop() })
 }
 
 export const Interpretation = {
