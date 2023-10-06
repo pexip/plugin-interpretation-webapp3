@@ -19,11 +19,13 @@
     "@pexip/infinity": "^17.1.0",
     "@pexip/plugin-api": "18.0.0",
     "eslint-plugin-react": "^7.33.2",
+    "iframe-resizer": "^4.3.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sass": "^1.66.1"
   },
   "devDependencies": {
+    "@types/iframe-resizer": "^3.5.10",
     "@types/react": "^18.2.18",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^5.61.0",
