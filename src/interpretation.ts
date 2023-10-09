@@ -12,7 +12,7 @@ import { getPlugin } from './plugin'
 import { config } from './config'
 import { getMainConferenceAlias } from './conference'
 import { getUser } from './user'
-import { Role } from './role'
+import { Role } from './types/Role'
 import { showErrorPrompt } from './prompts'
 
 const deviceIdStorageKey = 'PexInterpretation:deviceId'

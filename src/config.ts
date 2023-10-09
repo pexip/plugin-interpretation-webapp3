@@ -1,5 +1,5 @@
 import type { Language } from './language'
-import type { Role } from './role'
+import type { Role } from './types/Role'
 
 interface Config {
   role: Role

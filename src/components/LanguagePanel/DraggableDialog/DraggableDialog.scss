@@ -1,0 +1,38 @@
+.DraggableDialog {
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  flex-direction: column;
+  min-width: 300px;
+
+  .Header {
+    padding: var(--box-compact-spacing);
+    width: calc(100% - var(--box-compact-spacing) * 2);
+    display: flex;
+    align-items: center;
+
+    .DraggableButton {
+      background-color: transparent;
+      border: 0;
+      cursor: grab;
+    }
+
+    .Title {
+      font-weight: bold;
+      flex-grow: 1;
+    }
+
+    .Minimize, .Close {
+      cursor: pointer;
+    }
+  }
+
+  &>.Container {
+    width: -moz-available;          /* WebKit-based browsers will ignore this. */
+    width: -webkit-fill-available;  /* Mozilla-based browsers will ignore this. */
+    width: fill-available;
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+  }
+}

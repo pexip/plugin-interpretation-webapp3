@@ -5,13 +5,13 @@ import { setPlugin } from './plugin'
 import { initializeEvents } from './events'
 import { initializeButton, setButtonActive } from './button'
 import { initializeIFrame } from './iframe'
-import { LanguageIndicator } from './components/LanguagePanel/LanguagePanel'
+import { LanguagePanel } from './components/LanguagePanel/LanguagePanel'
 import { ThemeProvider } from '@pexip/components'
 import { Interpretation } from './interpretation'
 import type { Language } from './language'
 import { setMainRoomVolume, muteMainRoomAudio } from './main-room'
 import { config } from './config'
-import { Role } from './role'
+import { Role } from './types/Role'
 
 export const App = (): JSX.Element => {
   const [language, setLanguage] = useState<Language | null>(null)
@@ -51,8 +51,8 @@ export const App = (): JSX.Element => {
   return (
     <ThemeProvider colorScheme='light'>
       {language != null &&
-        <LanguageIndicator
-          languageName={language?.name ?? ''}
+        <LanguagePanel
+          defaultLanguage={language}
           role={config.role}
         />}
     </ThemeProvider>

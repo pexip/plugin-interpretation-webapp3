@@ -1,13 +1,7 @@
-import { config } from './config'
 import { Interpretation } from './interpretation'
-import { getLanguageByCode } from './language'
+import { getLanguageByCode, getLanguageOptions } from './language'
 import { getPlugin } from './plugin'
-import { capitalizeFirstLetter } from './utils'
-
-type Options = Array<{
-  id: string
-  label: string
-}>
+import type { Option } from './types/Option'
 
 export const showInterpreterForm = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -85,15 +79,7 @@ export const showSelectMicForm = async (): Promise<void> => {
   }
 }
 
-const getLanguageOptions = (): Options => {
-  const options = config.languages.map((language) => ({
-    id: language.code,
-    label: capitalizeFirstLetter(language.name)
-  }))
-  return options
-}
-
-const getAudioInputDevicesOptions = (devices: MediaDeviceInfo[]): Options => {
+const getAudioInputDevicesOptions = (devices: MediaDeviceInfo[]): Option[] => {
   const options = devices.map((device) => ({
     id: device.deviceId,
     label: device.label

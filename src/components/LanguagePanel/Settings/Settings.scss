@@ -1,0 +1,17 @@
+.Settings {
+  border-top: 1px solid var(--color-neutral-20);
+  width: calc(100% - 2em);
+  padding: 1em;
+
+  .ChangeMicrophone {
+    margin-top: 1em;
+  }
+
+  button {
+    cursor: pointer;
+    background-color: transparent;
+    outline: 0;
+    border: 0;
+    font-weight: 600;
+  }
+}

@@ -1,98 +1,33 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React from 'react'
 
-import { Box, BoxHeader, Button, Icon, IconTypes, RangeSlider, Text, Tooltip } from '@pexip/components'
-import { capitalizeFirstLetter } from '../../utils'
-import { Role } from '../../role'
-import { Interpretation } from '../../interpretation'
+import type { Role } from '../../types/Role'
 import { showDisconnectPrompt } from '../../prompts'
+import { type Language } from '../../language'
+import { Settings } from './Settings/Settings'
+import { Volume } from './Volume/Volume'
+import { LanguagesSelector } from './LanguageSelector/LanguageSelector'
+import { DraggableDialog } from './DraggableDialog/DraggableDialog'
 
-import './LanguagePanel.scss'
-import { showSelectMicForm } from '../../forms'
-import { moveIFrame, toggleIFramePointerEvents, togglePointerEvents } from '../../iframe'
-
-interface LanguageIndicatorProps {
-  languageName: string
+interface LanguagePanelProps {
+  defaultLanguage: Language
   role: Role
 }
 
-export const LanguageIndicator = (props: LanguageIndicatorProps): JSX.Element => {
-  const [audioMuted, setAudioMuted] = useState(false)
-  const [volume, setVolume] = useState<number>(0)
-
-  const refDragButton = useRef<HTMLButtonElement>(null)
-
-  const handleMuteAudio = async (): Promise<void> => {
-    await Interpretation.setAudioMuted(!audioMuted)
-    setAudioMuted(!audioMuted)
-  }
-
-  useEffect(() => {
-    let dragging = false
-
-    const handleMove = (event: MouseEvent): void => {
-      if (dragging) {
-        const x = event.pageX
-        const y = event.pageY
-        moveIFrame(x, y)
-      }
-    }
-
-    if (refDragButton?.current != null) {
-      refDragButton.current.addEventListener('mousedown', (e) => {
-        dragging = true
-        toggleIFramePointerEvents(false)
-        e.preventDefault()
-        parent.document.body.addEventListener('mouseup', () => {
-          dragging = false
-          toggleIFramePointerEvents(true)
-        }, { once: true })
-      })
-      parent.document.addEventListener('mousemove', handleMove)
-    }
-    return () => {
-      parent.document.removeEventListener('mousemove', handleMove)
-    }
-  }, [refDragButton])
-
+export const LanguagePanel = (props: LanguagePanelProps): JSX.Element => {
   return (
-    <Box className='LanguagePanel'>
-      <BoxHeader className='Header'>
-        <button className="DraggableButton" ref={refDragButton}><Icon source={IconTypes.IconDraggable} /></button>
-        <span className='Title'>Interpretation</span>
-        <Icon source={IconTypes.IconMinus} />
-        <Icon source={IconTypes.IconClose} />
-      </BoxHeader>
+    <DraggableDialog
+      title='Interpretation'
+      onMinimize={() => {
+        throw new Error('Function not implemented.')
+      }}
+      onClose={() => {
+        showDisconnectPrompt().catch((e) => { console.error(e) })
+      }}>
       <div className='Container'>
-        <div className='row'>
-          <Text className='LanguageText'>
-            {capitalizeFirstLetter(props.languageName)}
-          </Text>
-          <div className='Toolbar'>
-              {props.role === Role.Interpreter &&
-                <>
-                  <Tooltip text={audioMuted ? 'Unmute microphone' : 'Mute microphone'} position='bottom'>
-                    <Button modifier='square' onClick={() => { handleMuteAudio().catch((e) => { console.error(e) }) }} variant={audioMuted ? 'danger' : 'primary'}>
-                      <Icon source={audioMuted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip text='Change microphone' position='bottom'>
-                    <Button modifier='square' onClick={() => { showSelectMicForm().catch((e) => { console.error(e) }) }} >
-                      <Icon source={IconTypes.IconSettings} />
-                    </Button>
-                  </Tooltip>
-                </>
-              }
-              <Tooltip text='Leave interpretation' position='bottom'>
-                <Button modifier='square' onClick={() => { showDisconnectPrompt().catch((e) => { console.error(e) }) }} aria-label='Test'>
-                  <Icon source={IconTypes.IconLeave} />
-                </Button>
-              </Tooltip>
-          </div>
-        </div>
-        <span>Volume</span>
-        <RangeSlider className='VolumeSlider' min={0} max={100} step={1} selectedValue={volume} onChange={(event) => { setVolume(parseInt(event.target.value)) }}/>
-        <span>Main floor</span><span>Interpreter</span>
+        <LanguagesSelector defaultLanguage={props.defaultLanguage} />
+        <Volume />
+        <Settings />
       </div>
-    </Box>
+    </DraggableDialog>
   )
 }
