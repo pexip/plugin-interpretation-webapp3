@@ -3,15 +3,40 @@
   width: calc(100% - 2em);
   padding: 1em;
 
-  .ChangeMicrophone {
-    margin-top: 1em;
-  }
-
-  button {
+  .SettingsHeader {
     cursor: pointer;
     background-color: transparent;
     outline: 0;
     border: 0;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    padding: 0;
+
+    .Chevron {
+      transition: transform 0.2s ease-in-out;
+
+      &.opened {
+        transform: rotate(90deg);
+      }
+    }
+  }
+
+  .SettingsContainer {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 1em;
+
+    .MuteAudioButton {
+      cursor: pointer;
+      padding-right: 0.5em;
+      width: 2em;
+    }
+
+    .ChangeMicrophone {
+      width: calc(100% - 2.5em);
+      margin: 0 !important;
+    }
   }
 }

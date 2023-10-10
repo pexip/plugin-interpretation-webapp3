@@ -1,7 +1,6 @@
 import { Interpretation } from './interpretation'
 import { getLanguageByCode, getLanguageOptions } from './language'
 import { getPlugin } from './plugin'
-import type { Option } from './types/Option'
 
 export const showInterpreterForm = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -50,39 +49,4 @@ export const showPinForm = async (): Promise<void> => {
   } else {
     await Interpretation.leave()
   }
-}
-
-export const showSelectMicForm = async (): Promise<void> => {
-  const plugin = getPlugin()
-
-  const devices = await navigator.mediaDevices.enumerateDevices()
-  const audioInputDevices = devices.filter((device) => device.kind === 'audioinput')
-
-  const input = await plugin.ui.showForm({
-    title: 'Select Microphone',
-    description: 'Select the microphone to use for the interpretation. It could be different that the one used in the main room.',
-    form: {
-      elements: {
-        device: {
-          name: 'Microphone',
-          type: 'select',
-          options: getAudioInputDevicesOptions(audioInputDevices)
-        }
-      },
-      submitBtnTitle: 'Change'
-    }
-  })
-  if (input.device != null) {
-    await Interpretation.setAudioInputDevice(input.device)
-    const deviceLabel = audioInputDevices.find((device) => device.deviceId === input.device)?.label ?? 'unknown'
-    plugin.ui.showToast({ message: `Changed microphone to "${deviceLabel}"` }).catch((e) => { console.error(e) })
-  }
-}
-
-const getAudioInputDevicesOptions = (devices: MediaDeviceInfo[]): Option[] => {
-  const options = devices.map((device) => ({
-    id: device.deviceId,
-    label: device.label
-  }))
-  return options
 }

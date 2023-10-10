@@ -86,6 +86,10 @@ const setAudioInputDevice = async (deviceId: string): Promise<void> => {
   infinityClient.setStream(mediaStream)
 }
 
+const getAudioInputDevice = (): string | null => {
+  return localStorage.getItem(deviceIdStorageKey)
+}
+
 const leave = async (): Promise<void> => {
   await infinityClient.disconnect({ reason: 'User initiated disconnect' })
   currentLanguage = null
@@ -156,6 +160,7 @@ export const Interpretation = {
   join,
   setAudioMuted,
   setAudioInputDevice,
+  getAudioInputDevice,
   getCurrentLanguage,
   leave
 }

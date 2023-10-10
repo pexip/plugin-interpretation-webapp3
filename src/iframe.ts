@@ -16,7 +16,7 @@ export const initializeIFrame = (): void => {
   const body = document.getElementsByTagName('body')[0]
   body.style.overflow = 'hidden'
 
-  iframeResizer.iframeResizer({ log: true, sizeWidth: true }, pluginIFrame as HTMLElement)
+  iframeResizer.iframeResizer({ sizeWidth: true }, pluginIFrame as HTMLElement)
 }
 
 export const toggleIFramePointerEvents = (enable: boolean): void => {

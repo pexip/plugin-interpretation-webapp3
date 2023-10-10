@@ -1,49 +1,67 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import { DeviceSelect } from '@pexip/media-components'
-import { IconTypes } from '@pexip/components'
+import { Icon, IconTypes, Tooltip } from '@pexip/components'
 import type { MediaDeviceInfoLike } from '@pexip/media-control'
+import { Interpretation } from '../../../interpretation'
 
 import './Settings.scss'
 
 export const Settings = (): JSX.Element => {
+  const [opened, setOpened] = useState(false)
+
+  const [devices, setDevices] = useState<MediaDeviceInfoLike[]>()
+  const [selectedDevice, setSelectedDevice] = useState<MediaDeviceInfoLike>()
+
+  const [audioMuted, setAudioMuted] = useState(false)
+
+  const handleMuteAudio = async (): Promise<void> => {
+    await Interpretation.setAudioMuted(!audioMuted)
+    setAudioMuted(!audioMuted)
+  }
+
+  const handleChangeMicrophone = async (device: MediaDeviceInfoLike): Promise<void> => {
+    await Interpretation.setAudioInputDevice(device.deviceId)
+    setSelectedDevice(device)
+  }
+
+  useEffect(() => {
+    const bootstrap = async (): Promise<void> => {
+      const devices = await navigator.mediaDevices.enumerateDevices()
+      const filteredDevice = devices.filter((device) => device.kind === 'audioinput')
+      setDevices(filteredDevice)
+      const deviceId = Interpretation.getAudioInputDevice()
+      const selectedDevice = filteredDevice.find((device) => device.deviceId === deviceId)
+      setSelectedDevice(selectedDevice ?? devices[0])
+    }
+    bootstrap().catch((e) => { console.error(e) })
+  }, [])
+
   return (
-  <div className='Settings'>
-      <button>View all settings</button>
-      <DeviceSelect
-        className='ChangeMicrophone'
-        devices={[]}
-        isDisabled={false}
-        label='Microphone'
-        iconType={IconTypes.IconMicrophoneOn}
-        onDeviceChange={
-          function (device: MediaDeviceInfoLike): void {
-            throw new Error('Function not implemented.')
-          }
-        }
-      />
+    <div className='Settings'>
+      <button className='SettingsHeader'onClick={() => { setOpened(!opened) }}>
+        <Icon className={`Chevron ${opened ? 'opened' : ''}`} source={IconTypes.IconChevronRight}/>
+        <span>View settings</span>
+      </button>
+
+      {opened && <div className='SettingsContainer'>
+
+        <Tooltip text={audioMuted ? 'Unmute microphone' : 'Mute microphone'} position='right'>
+            <Icon
+              source={audioMuted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn}
+              onClick={() => { handleMuteAudio().catch((e) => { console.error(e) }) }}
+              className='MuteAudioButton'
+            />
+        </Tooltip>
+
+        <DeviceSelect
+          className='ChangeMicrophone'
+          devices={devices ?? []}
+          isDisabled={false}
+          label={selectedDevice?.label ?? 'Select microphone'}
+          onDeviceChange={(device) => { handleChangeMicrophone(device).catch((e) => { console.error(e) }) }}
+        />
+      </div>}
     </div>
   )
 }
-
-// const [audioMuted, setAudioMuted] = useState(false)
-// const handleMuteAudio = async (): Promise<void> => {
-//   await Interpretation.setAudioMuted(!audioMuted)
-//   setAudioMuted(!audioMuted)
-// }
-// {/* <div className='Toolbar'>
-//     {props.role === Role.Interpreter &&
-//       <>
-//         <Tooltip text={audioMuted ? 'Unmute microphone' : 'Mute microphone'} position='bottom'>
-//           <Button modifier='square' onClick={() => { handleMuteAudio().catch((e) => { console.error(e) }) }} variant={audioMuted ? 'danger' : 'primary'}>
-//             <Icon source={audioMuted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
-//           </Button>
-//         </Tooltip>
-//         <Tooltip text='Change microphone' position='bottom'>
-//           <Button modifier='square' onClick={() => { showSelectMicForm().catch((e) => { console.error(e) }) }} >
-//             <Icon source={IconTypes.IconSettings} />
-//           </Button>
-//         </Tooltip>
-//       </>
-//     }
-// </div> */}
