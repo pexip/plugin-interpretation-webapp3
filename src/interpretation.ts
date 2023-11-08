@@ -71,6 +71,10 @@ const join = async (language: Language, pin?: string): Promise<void> => {
   }
 }
 
+const setLanguage = (language: Language): void => {
+  throw new Error('Not implemented')
+}
+
 const getCurrentLanguage = (): Language | null => {
   return currentLanguage
 }
@@ -161,6 +165,7 @@ export const Interpretation = {
   setAudioMuted,
   setAudioInputDevice,
   getAudioInputDevice,
+  setLanguage,
   getCurrentLanguage,
   leave
 }

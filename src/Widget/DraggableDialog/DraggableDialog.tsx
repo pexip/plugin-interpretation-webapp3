@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { Box, BoxHeader, Icon, IconTypes } from '@pexip/components'
-import { moveIFrame, toggleIFramePointerEvents } from '../../../iframe'
+import { moveIFrame, toggleIFramePointerEvents } from '../../iframe'
 
 import './DraggableDialog.scss'
 

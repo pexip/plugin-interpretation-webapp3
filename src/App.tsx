@@ -5,7 +5,7 @@ import { setPlugin } from './plugin'
 import { initializeEvents } from './events'
 import { initializeButton, setButtonActive } from './button'
 import { initializeIFrame } from './iframe'
-import { LanguagePanel } from './components/LanguagePanel/LanguagePanel'
+import { Widget } from './Widget/Widget'
 import { ThemeProvider } from '@pexip/components'
 import { Interpretation } from './interpretation'
 import type { Language } from './language'
@@ -51,7 +51,7 @@ export const App = (): JSX.Element => {
   return (
     <ThemeProvider colorScheme='light'>
       {language != null &&
-        <LanguagePanel
+        <Widget
           defaultLanguage={language}
           role={config.role}
         />}
