@@ -1,5 +1,5 @@
-import { Interpretation } from './interpretation'
-import { getLanguageByCode, getLanguageOptions } from './language'
+import { Interpretation } from './interpretation/interpretation'
+import { type Language, getLanguageByCode, getLanguageOptions } from './language'
 import { getPlugin } from './plugin'
 
 export const showInterpreterForm = async (): Promise<void> => {
@@ -18,10 +18,8 @@ export const showInterpreterForm = async (): Promise<void> => {
       submitBtnTitle: 'Join'
     }
   })
-  const language = getLanguageByCode(input.language)
-  if (language != null) {
-    await Interpretation.join(language)
-  }
+  const language = getLanguageByCode(input.language) as Language
+  await Interpretation.connect(language)
 }
 
 export const showPinForm = async (): Promise<void> => {
@@ -44,7 +42,7 @@ export const showPinForm = async (): Promise<void> => {
   if (input.pin != null) {
     const language = Interpretation.getCurrentLanguage()
     if (language != null) {
-      await Interpretation.join(language, input.pin)
+      await Interpretation.connect(language, input.pin)
     }
   } else {
     await Interpretation.leave()

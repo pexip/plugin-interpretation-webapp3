@@ -1,5 +1,5 @@
 import { showInterpreterForm } from './forms'
-import { Interpretation } from './interpretation'
+import { Interpretation } from './interpretation/interpretation'
 import { getPlugin } from './plugin'
 import { showDisconnectPrompt } from './prompts'
 import { isSameDomain } from './utils'

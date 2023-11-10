@@ -7,7 +7,7 @@ import { initializeButton, setButtonActive } from './button'
 import { initializeIFrame } from './iframe'
 import { Widget } from './Widget/Widget'
 import { ThemeProvider } from '@pexip/components'
-import { Interpretation } from './interpretation'
+import { Interpretation } from './interpretation/interpretation'
 import type { Language } from './language'
 import { setMainRoomVolume, muteMainRoomAudio } from './main-room'
 import { config } from './config'
@@ -28,7 +28,7 @@ export const App = (): JSX.Element => {
       await initializeButton()
       initializeIFrame()
 
-      Interpretation.registerOnChangeLanguageCallback((language) => {
+      Interpretation.registerOnChangeLanguageCallback((language, direction) => {
         if (language != null) {
           if (config.role === Role.Interpreter) {
             muteMainRoomAudio()
@@ -54,6 +54,7 @@ export const App = (): JSX.Element => {
         <Widget
           defaultLanguage={language}
           role={config.role}
+          allowChangeDirection={config.allowChangeDirection}
         />}
     </ThemeProvider>
   )

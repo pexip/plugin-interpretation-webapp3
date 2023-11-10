@@ -148,7 +148,8 @@ Here is an example of configuration:
       "code": "0034",
       "name": "spanish"
     }
-  ]
+  ],
+  "allowChangeDirection": true
 }
 ```
 
@@ -156,3 +157,40 @@ Here is an example of configuration:
 |-----------|-------------|
 | role | Indicates the role of the user that joins to the interpretation. We have two different roles: `interpreter` and `listener`.
 | languages | The list of all the available languages. Each language will have two values: `code` and `name`. The `code` is the subfix that will be attached to the conference name. For example, if for the main conference we have `conferenceAlias=123` and `code=0033`, the system will create a new audio conference with `conferenceAlias=1230033`. The `name` is used for the UI elements, such as selectors.
+
+The parameter `allowChangeDirection` needs an additional explanation. With this parameter enabled, the interpreter can translate in both direction; from the main room to the interpretation room and the other way around. Here is a description of the behavior when the interpreter and listener are connected to the interpretation:
+
+- `allowChangeDirection = false`: In this case the interpreter only can translate from the main room to a interpretation room. Here are some details about each role:
+
+
+  | Device | Role | Main Room | Interpretation Room |
+  |-|-|-|-|
+  | Mic | Interpreter | ❌ | ✅  |
+  | Mic | Listener | ✅ | ❌ |
+  | Speaker | Interpreter | 100% | 100 % |
+  | Speaker | Listener | ~10% | ~90% |
+
+  **Note:** The interpreter also have 100% volume in the Interpretation Room to detect if another interpreter joins to the same channel. In other case, both interpreters will start translating at the same time without being aware of the other.
+
+- `allowChangeDirection = true`: In this case the interpreter can change the direction of the translation. He can translate from the Main Room to the Interpretation Room and the other way around. In this case we have two other behavior based on the direction:
+  - **Main Room -> Interpretation Room:**
+  
+    | Direction | Role | Main Room | Interpretation Room |
+    |-|-|-|-|
+    | Mic | Interpreter | ❌ | ✅  |
+    | Mic | Listener | ❌ | ✅ |
+    | Speaker | Interpreter | 100% | 100% |
+    | Speaker | Listener | ~10% | ~90% |
+
+    **Notes:** The interpreter will listen both channels at the same time. The listener can only talk to the interpreter. The people of the Main Room won't listen to the listener directly ever.
+
+  - **Interpretation Room -> Main Room:**
+  
+    | Direction | Role | Main Room | Interpretation Room |
+    |-|-|-|-|
+    | Mic | Interpreter | ✅ | ❌ |
+    | Mic | Listener | ❌ | ✅ |
+    | Speaker | Interpreter | 100% | 100% |
+    | Speaker | Listener | ~10% | ~90% |
+
+    **Notes:** Now the interpreter will talk to the main room and the listener can still follow the conversation.

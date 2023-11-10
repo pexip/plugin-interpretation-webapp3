@@ -1,4 +1,4 @@
-import { Interpretation } from './interpretation'
+import { Interpretation } from './interpretation/interpretation'
 import { getPlugin } from './plugin'
 import { capitalizeFirstLetter } from './utils'
 

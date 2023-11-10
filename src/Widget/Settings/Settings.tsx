@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { DeviceSelect } from '@pexip/media-components'
 import { Icon, IconTypes, Tooltip } from '@pexip/components'
 import type { MediaDeviceInfoLike } from '@pexip/media-control'
-import { Interpretation } from '../../interpretation'
+import { Interpretation } from '../../interpretation/interpretation'
 
 import './Settings.scss'
 

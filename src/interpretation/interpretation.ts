@@ -6,14 +6,15 @@ import {
   createInfinityClientSignals,
   type CallSignals
 } from '@pexip/infinity'
-import type { Language } from './language'
-import { showPinForm } from './forms'
-import { getPlugin } from './plugin'
-import { config } from './config'
-import { getMainConferenceAlias } from './conference'
-import { getUser } from './user'
-import { Role } from './types/Role'
-import { showErrorPrompt } from './prompts'
+import type { Language } from '../language'
+import { showPinForm } from '../forms'
+import { getPlugin } from '../plugin'
+import { config } from '../config'
+import { getMainConferenceAlias } from '../conference'
+import { getUser } from '../user'
+import { Role } from '../types/Role'
+import { showErrorPrompt } from '../prompts'
+import { Direction } from '../types/Direction'
 
 const deviceIdStorageKey = 'PexInterpretation:deviceId'
 
@@ -22,17 +23,24 @@ const callSignals = createCallSignals([])
 const infinityClient = createInfinityClient(clientSignals, callSignals)
 const audio: HTMLAudioElement = new Audio()
 
-let handleChangeCallback: (language: Language | null) => void
+let handleChangeCallback: (language: Language | null, direction: Direction) => void
 let currentLanguage: Language | null = null
+let currentDirection: Direction = Direction.MainRoomToInterpretation
 let signalsInitialized: boolean = false
 let mediaStream: MediaStream | undefined
 
-const registerOnChangeLanguageCallback = (callback: (language: Language | null) => void): void => {
+const registerOnChangeLanguageCallback = (callback: (language: Language | null, direction: Direction) => void): void => {
   handleChangeCallback = callback
 }
 
-const join = async (language: Language, pin?: string): Promise<void> => {
+const connect = async (
+  language: Language,
+  pin?: string,
+  direction: Direction = Direction.MainRoomToInterpretation
+): Promise<void> => {
   currentLanguage = language
+  currentDirection = direction
+
   if (!signalsInitialized) {
     initializeInfinityClientSignals(clientSignals)
     initializeInfinityCallSignals(callSignals)
@@ -56,6 +64,8 @@ const join = async (language: Language, pin?: string): Promise<void> => {
 
   const displayName = `${username} - ${roleTag}`
 
+  // TODO: Leave if we are connected to another channel
+
   try {
     await infinityClient.call({
       conferenceAlias: getMainConferenceAlias() + language.code,
@@ -69,14 +79,6 @@ const join = async (language: Language, pin?: string): Promise<void> => {
     stopStream(mediaStream)
     throw e
   }
-}
-
-const setLanguage = (language: Language): void => {
-  throw new Error('Not implemented')
-}
-
-const getCurrentLanguage = (): Language | null => {
-  return currentLanguage
 }
 
 const setAudioMuted = async (mute: boolean): Promise<void> => {
@@ -94,10 +96,12 @@ const getAudioInputDevice = (): string | null => {
   return localStorage.getItem(deviceIdStorageKey)
 }
 
+const getCurrentLanguage = (): Language | null => currentLanguage
+
 const leave = async (): Promise<void> => {
   await infinityClient.disconnect({ reason: 'User initiated disconnect' })
   currentLanguage = null
-  handleChangeCallback(null)
+  handleChangeCallback(null, Direction.MainRoomToInterpretation)
   audio.pause()
 }
 
@@ -113,14 +117,14 @@ const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
       } else {
         if (currentLanguage != null) {
           const pin = ' '
-          await join(currentLanguage, pin)
+          await connect(currentLanguage, pin)
         }
       }
     }
     // TODO: What to do when no PIN for guest
   })
-  signals.onMe.add(async () => {
-    handleChangeCallback(currentLanguage)
+  signals.onAuthenticatedWithConference.add(async () => {
+    handleChangeCallback(currentLanguage, currentDirection)
   })
   signals.onError.add(async ({ error, errorCode }): Promise<void> => {
     await showErrorPrompt(error)
@@ -161,11 +165,10 @@ const stopStream = (stream: MediaStream | undefined): void => {
 
 export const Interpretation = {
   registerOnChangeLanguageCallback,
-  join,
+  connect,
   setAudioMuted,
   setAudioInputDevice,
   getAudioInputDevice,
-  setLanguage,
   getCurrentLanguage,
   leave
 }

@@ -1,5 +1,6 @@
 {
   "role": "interpreter",
+  "allowChangeDirection": false,
   "languages": [
     {
       "code": "0033",

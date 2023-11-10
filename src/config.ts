@@ -3,6 +3,7 @@ import type { Role } from './types/Role'
 
 interface Config {
   role: Role
+  allowChangeDirection: boolean
   languages: Language[]
 }
 

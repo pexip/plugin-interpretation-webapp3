@@ -5,13 +5,14 @@ import { showDisconnectPrompt } from '../prompts'
 import { type Language } from '../language'
 import { Settings } from './Settings/Settings'
 import { Volume } from './Volume/Volume'
-import { InterpreterSelector } from './InterpreterSelector/InterpreterSelector'
-import { ListenerSelector } from './ListenerSelector/ListenerSelector'
+import { AdvanceLanguageSelector } from './AdvanceLanguageSelector/AdvanceLanguageSelector'
+import { BaseLanguageSelector } from './BaseLanguageSelector/BaseLanguageSelector'
 import { DraggableDialog } from './DraggableDialog/DraggableDialog'
 
 interface WidgetProps {
   defaultLanguage: Language
   role: Role
+  allowChangeDirection: boolean
 }
 
 export const Widget = (props: WidgetProps): JSX.Element => {
@@ -25,18 +26,19 @@ export const Widget = (props: WidgetProps): JSX.Element => {
         showDisconnectPrompt().catch((e) => { console.error(e) })
       }}>
       <div className='Container'>
-        {props.role === Role.Interpreter &&
-          <>
-            <InterpreterSelector defaultLanguage={props.defaultLanguage} />
-            <Settings />
-          </>
-        }
-        {props.role === Role.Listener &&
-          <>
-            <ListenerSelector defaultLanguage={props.defaultLanguage} />
-            <Volume />
-          </>
-        }
+        {props.role === Role.Interpreter && <>
+          {props.allowChangeDirection &&
+            <AdvanceLanguageSelector defaultLanguage={props.defaultLanguage} />
+          }
+          {!props.allowChangeDirection &&
+            <BaseLanguageSelector defaultLanguage={props.defaultLanguage} />
+          }
+          <Settings />
+        </>}
+        {props.role === Role.Listener && <>
+          <BaseLanguageSelector defaultLanguage={props.defaultLanguage} />
+          <Volume />
+        </>}
       </div>
     </DraggableDialog>
   )
