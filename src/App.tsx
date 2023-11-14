@@ -14,6 +14,7 @@ import { config } from './config'
 import { Role } from './types/Role'
 
 export const App = (): JSX.Element => {
+  const [visible, setVisible] = useState(false)
   const [language, setLanguage] = useState<Language | null>(null)
 
   useEffect(() => {
@@ -43,6 +44,7 @@ export const App = (): JSX.Element => {
         }
         setButtonActive(language != null).catch((e) => { console.error(e) })
         setLanguage(language)
+        setVisible(true)
       })
     }
     bootStrap().catch((e) => { console.error(e) })
@@ -50,11 +52,13 @@ export const App = (): JSX.Element => {
 
   return (
     <ThemeProvider colorScheme='light'>
-      {language != null &&
+      <span>{visible.toString()}</span>
+      {language != null && visible &&
         <Widget
           defaultLanguage={language}
           role={config.role}
           allowChangeDirection={config.allowChangeDirection}
+          onMinimize={() => { setVisible(false) }}
         />}
     </ThemeProvider>
   )

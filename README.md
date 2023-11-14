@@ -193,4 +193,6 @@ The parameter `allowChangeDirection` needs an additional explanation. With this 
     | Speaker | Interpreter | 100% | 100% |
     | Speaker | Listener | ~10% | ~90% |
 
-    **Notes:** Now the interpreter will talk to the main room and the listener can still follow the conversation.
+    **Notes:** Now the interpreter will talk to the main room and the listener can still follow the conversation (~10% volume).
+
+In both cases, if the interpreter leaves the interpretation room or if he is muted, we put the volume of the main room to 100% for the listener and we disable the slider.

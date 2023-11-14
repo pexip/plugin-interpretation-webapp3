@@ -1,6 +1,7 @@
 {
   "role": "listener",
   "allowChangeDirection": false,
+  "defaultInterpretationVolume": 0.2,
   "languages": [
     {
       "code": "0033",

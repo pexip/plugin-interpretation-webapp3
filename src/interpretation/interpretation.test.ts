@@ -1,7 +1,7 @@
-jest.mock('@pexip/infinity', () => {
-  const actual = jest.requireActual('@pexip/infinity')
-  return { ...actual }
-})
+// jest.mock('@pexip/infinity', () => {
+//   const actual = jest.requireActual('@pexip/infinity')
+//   return { ...actual }
+// })
 
 describe('Interpretation', () => {
   describe('connect', () => {

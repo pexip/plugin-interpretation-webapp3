@@ -13,6 +13,7 @@ interface WidgetProps {
   defaultLanguage: Language
   role: Role
   allowChangeDirection: boolean
+  onMinimize: () => void
 }
 
 export const Widget = (props: WidgetProps): JSX.Element => {

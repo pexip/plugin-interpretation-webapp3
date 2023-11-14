@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 
-import { Box, BoxHeader, Icon, IconTypes } from '@pexip/components'
+import { Box, BoxHeader, Icon, IconTypes, Tooltip } from '@pexip/components'
 import { moveIFrame, toggleIFramePointerEvents } from '../../iframe'
 
 import './DraggableDialog.scss'
@@ -50,9 +50,13 @@ export const DraggableDialog = (props: DraggableDialogProps): JSX.Element => {
 
         <span className='Title'>{props.title}</span>
 
-        <Icon className='Minimize' source={IconTypes.IconMinus} onClick={() => { props.onMinimize() }}/>
+        <Tooltip text='Hide dialog' position='bottomLeft'>
+          <Icon className='Minimize' source={IconTypes.IconMinus} onClick={() => { props.onMinimize() }}/>
+        </Tooltip>
 
-        <Icon className='Close' source={IconTypes.IconClose} onClick={() => { props.onClose() }}/>
+        <Tooltip text='Leave interpretation' position='bottomLeft'>
+          <Icon className='Close' source={IconTypes.IconClose} onClick={() => { props.onClose() }}/>
+        </Tooltip>
       </BoxHeader>
       {props.children}
     </Box>

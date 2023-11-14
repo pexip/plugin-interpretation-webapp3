@@ -25,6 +25,10 @@
     .Minimize, .Close {
       cursor: pointer;
     }
+
+    [data-testid=tooltip-inner] {
+      right: calc(50% - 15px)
+    }
   }
 
   &>.Container {
