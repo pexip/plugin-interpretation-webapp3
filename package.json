@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "test": "jest --detectOpenHandles",
+    "test": "jest --detectOpenHandles --silent",
     "lint": "eslint .",
     "interpreter": "ROLE=interpreter vite",
     "listener": "ROLE=listener vite"
@@ -56,6 +56,8 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "jsdom",
-    "setupFilesAfterEnv": ["<rootDir>/src/setupTests.ts"]
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
+    ]
   }
 }

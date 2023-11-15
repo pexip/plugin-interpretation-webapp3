@@ -1,9 +1,10 @@
 import React from 'react'
 import { act, render, screen } from '@testing-library/react'
 import { App } from './App'
-import { Interpretation } from './interpretation/interpretation'
+import { type ConnectRequest, Interpretation } from './interpretation/interpretation'
 import type { Language } from './language'
-import { Direction } from './types/Direction'
+import type { Direction } from './types/Direction'
+import { Role } from './types/Role'
 
 jest.mock('@pexip/plugin-api', () => ({
   registerPlugin: jest.fn()
@@ -62,7 +63,11 @@ describe('App', () => {
       name: 'Spanish'
     }
     await act(async () => {
-      await Interpretation.connect(language, Direction.MainRoomToInterpretation)
+      const request: ConnectRequest = {
+        language,
+        role: Role.Listener
+      }
+      await Interpretation.connect(request)
     })
     const widget = screen.getByTestId('Widget')
     expect(widget).toBeInTheDocument()

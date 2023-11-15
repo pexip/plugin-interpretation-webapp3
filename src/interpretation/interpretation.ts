@@ -25,6 +25,7 @@ const audio: HTMLAudioElement = new Audio()
 
 let handleChangeCallback: (language: Language | null, direction: Direction) => void
 let currentLanguage: Language | null = null
+let currentRole: Role | null = null
 let currentDirection: Direction = Direction.MainRoomToInterpretation
 let signalsInitialized: boolean = false
 let mediaStream: MediaStream | undefined
@@ -33,13 +34,17 @@ const registerOnChangeLanguageCallback = (callback: (language: Language | null, 
   handleChangeCallback = callback
 }
 
-const connect = async (
-  language: Language,
-  pin?: string,
-  direction: Direction = Direction.MainRoomToInterpretation
-): Promise<void> => {
-  currentLanguage = language
-  currentDirection = direction
+interface ConnectRequest {
+  language: Language
+  role: Role
+  pin?: string
+  direction?: Direction
+}
+
+const connect = async (request: ConnectRequest): Promise<void> => {
+  currentLanguage = request.language
+  currentRole = request.role
+  currentDirection = request.direction ?? Direction.MainRoomToInterpretation
 
   if (!signalsInitialized) {
     initializeInfinityClientSignals(clientSignals)
@@ -47,12 +52,11 @@ const connect = async (
     signalsInitialized = true
   }
 
-  const role = config.role
   const username = getUser().displayName ?? getUser().uuid
   let roleTag: string
   let callType: ClientCallType
 
-  if (role === Role.Interpreter) {
+  if (request.role === Role.Interpreter) {
     roleTag = 'Interpreter'
     mediaStream = await getMediaStream()
     callType = ClientCallType.AudioSendOnly
@@ -68,12 +72,12 @@ const connect = async (
 
   try {
     await infinityClient.call({
-      conferenceAlias: getMainConferenceAlias() + language.code,
-      bandwidth: 0,
-      callType,
+      conferenceAlias: getMainConferenceAlias() + request.language.code,
       displayName,
+      callType,
+      bandwidth: 0,
       mediaStream,
-      pin
+      pin: request.pin
     })
   } catch (e) {
     stopStream(mediaStream)
@@ -115,9 +119,14 @@ const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
       if (hasGuestPin) {
         await showPinForm()
       } else {
-        if (currentLanguage != null) {
+        if (currentLanguage != null && currentRole != null) {
           const pin = ' '
-          await connect(currentLanguage, pin)
+          const request: ConnectRequest = {
+            language: currentLanguage,
+            role: currentRole,
+            pin
+          }
+          await connect(request)
         }
       }
     }
@@ -171,4 +180,8 @@ export const Interpretation = {
   getAudioInputDevice,
   getCurrentLanguage,
   leave
+}
+
+export type {
+  ConnectRequest
 }
