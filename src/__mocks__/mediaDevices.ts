@@ -1,4 +1,4 @@
-const devices = [
+export const testDevices = [
   {
     deviceId: 'eca985c54fd3aa20a7b28be863decfaba34a7957a6c6e7a495b9be25264c720a',
     kind: 'audioinput',
@@ -41,7 +41,9 @@ const devices = [
     label: 'GM206 High Definition Audio Controller Digital Stereo (HDMI 2)',
     groupId: 'd3a1c2c191f8b4de4d4a71196912495b08c0774a952d0f871457de8a3db0ca62'
   }
-]
+];
+
+(window as any).currentAudioTracks = [testDevices[0]]
 
 class MediaStream {
   id: string = '1234'
@@ -51,7 +53,7 @@ class MediaStream {
   onaddtrack: any = jest.fn()
   onremovetrack: any = jest.fn()
   clone: any = jest.fn()
-  getAudioTracks: any = jest.fn(() => [devices[0]])
+  getAudioTracks: any = jest.fn(() => (window as any).currentAudioTracks)
   getTrackById: any = jest.fn()
   getVideoTracks: any = jest.fn()
   removeTrack: any = jest.fn()
@@ -63,14 +65,19 @@ window.MediaStream = MediaStream
 
 // Also return the same mediaStream. This way is easier to test.
 const mediaStream = new MediaStream()
+
 Object.defineProperty(global.navigator, 'mediaDevices', {
   value: {
     enumerateDevices: async () => {
       return await new Promise<any[]>(resolve => {
-        resolve(devices)
+        resolve(testDevices)
       })
     },
-    getUserMedia: async () => {
+    getUserMedia: async (options: any) => {
+      if (options?.audio.deviceId != null) {
+        const devices = testDevices.filter((device) => device.deviceId === options.audio.deviceId);
+        (window as any).currentAudioTracks = devices
+      }
       return await new Promise<MediaStream>((resolve, reject) => {
         resolve(mediaStream)
       })
