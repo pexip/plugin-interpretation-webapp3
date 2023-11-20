@@ -102,6 +102,14 @@ const getAudioInputDevice = (): string | null => {
 
 const getCurrentLanguage = (): Language | null => currentLanguage
 
+const setMainRoomVolume = (volume: number): void => {
+
+}
+
+const setInterpretationVolume = (volume: number): void => {
+
+}
+
 const leave = async (): Promise<void> => {
   await infinityClient.disconnect({ reason: 'User initiated disconnect' })
   currentLanguage = null
@@ -179,6 +187,8 @@ export const Interpretation = {
   setAudioInputDevice,
   getAudioInputDevice,
   getCurrentLanguage,
+  setMainRoomVolume,
+  setInterpretationVolume,
   leave
 }
 
