@@ -237,5 +237,18 @@ describe('Interpretation', () => {
       const expectedDirection = Direction.MainRoomToInterpretation
       expect(mockChangeCallback).toHaveBeenCalledWith(expectedLanguage, expectedDirection)
     })
+
+    it('should set the main room volume to 100%', async () => {
+      const request: ConnectRequest = {
+        language,
+        role: Role.Listener
+      }
+      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
+      await Interpretation.connect(request)
+      Interpretation.setMainRoomVolume(0.5)
+      await Interpretation.leave()
+      const volume = Interpretation.getMainRoomVolume()
+      expect(volume).toBe(1)
+    })
   })
 })

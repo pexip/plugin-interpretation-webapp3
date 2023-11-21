@@ -29,6 +29,7 @@ let currentRole: Role | null = null
 let currentDirection: Direction = Direction.MainRoomToInterpretation
 let signalsInitialized: boolean = false
 let mediaStream: MediaStream | undefined
+let mainRoomVolume: number = 1
 
 const registerOnChangeLanguageCallback = (callback: (language: Language | null, direction: Direction) => void): void => {
   handleChangeCallback = callback
@@ -103,11 +104,17 @@ const getAudioInputDevice = (): string | null => {
 const getCurrentLanguage = (): Language | null => currentLanguage
 
 const setMainRoomVolume = (volume: number): void => {
-
+  mainRoomVolume = volume
+  const remoteVideo = parent.document.querySelector("[data-testid='video-meeting']") as HTMLVideoElement
+  if (remoteVideo != null) {
+    remoteVideo.volume = mainRoomVolume
+  }
 }
 
-const setInterpretationVolume = (volume: number): void => {
+const getMainRoomVolume = (): number => mainRoomVolume
 
+const setInterpretationVolume = (volume: number): void => {
+  audio.volume = volume
 }
 
 const leave = async (): Promise<void> => {
@@ -115,6 +122,7 @@ const leave = async (): Promise<void> => {
   currentLanguage = null
   handleChangeCallback(null, Direction.MainRoomToInterpretation)
   audio.pause()
+  setMainRoomVolume(1)
 }
 
 const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
@@ -188,6 +196,7 @@ export const Interpretation = {
   getAudioInputDevice,
   getCurrentLanguage,
   setMainRoomVolume,
+  getMainRoomVolume,
   setInterpretationVolume,
   leave
 }
