@@ -1,5 +1,9 @@
+const videoMeetingTestId = 'video-meeting'
+
+const videoMeetingSelector = `video[data-testid=${videoMeetingTestId}]`
+
 const set = (volume: number): void => {
-  const video = parent.document.querySelector("[data-testid='video-meeting']") as HTMLVideoElement
+  const video: HTMLVideoElement | null = parent.document.querySelector(videoMeetingSelector)
   if (video != null) {
     video.volume = volume
   }

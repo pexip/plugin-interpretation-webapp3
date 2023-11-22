@@ -37,9 +37,13 @@ export const disable = (disabled: boolean): void => {
 
   // Observe when the selfView is re-created and take the disable value from the
   // toolbar mute button and reflects it in the button in the selfView.
-  const selfViewContainer = parent.document.querySelector(selfViewContainerSelector)
-  if (selfViewContainer != null) {
-    selfViewObserver.observe(selfViewContainer, selfViewObserverConfig)
+  if (disabled) {
+    const selfViewContainer = parent.document.querySelector(selfViewContainerSelector)
+    if (selfViewContainer != null) {
+      selfViewObserver.observe(selfViewContainer, selfViewObserverConfig)
+    }
+  } else {
+    selfViewObserver.disconnect()
   }
 }
 
