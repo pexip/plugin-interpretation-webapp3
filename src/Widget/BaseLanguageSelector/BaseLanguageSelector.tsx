@@ -4,7 +4,6 @@ import { getLanguageByCode, getLanguageOptions } from '../../language'
 import type { Language } from '../../types/Language'
 import { Select } from '@pexip/components'
 import { type ConnectRequest, Interpretation } from '../../interpretation/interpretation'
-import { Direction } from '../../types/Direction'
 import type { Role } from '../../types/Role'
 
 import './BaseLanguageSelector.scss'
@@ -23,8 +22,7 @@ export const BaseLanguageSelector = (props: BaseLanguageSelectorProps): JSX.Elem
     if (language != null) {
       const request: ConnectRequest = {
         language,
-        role: props.role,
-        direction: Direction.MainRoomToInterpretation
+        role: props.role
       }
       await Interpretation.connect(request)
     }

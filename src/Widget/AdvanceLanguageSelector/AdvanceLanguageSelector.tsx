@@ -4,11 +4,11 @@ import { Select } from '@pexip/components'
 import { getLanguageOptions, getLanguageByCode } from '../../language'
 import type { Language } from '../../types/Language'
 import { type ConnectRequest, Interpretation } from '../../interpretation/interpretation'
-import { Direction } from '../../types/Direction'
 import type { Role } from '../../types/Role'
 import clsx from 'clsx'
 
 import './AdvanceLanguageSelector.scss'
+import { Direction } from '../../types/Direction'
 
 interface AdvanceLanguageSelectorProps {
   defaultLanguage: Language
@@ -28,21 +28,27 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
     if (newLanguage != null) {
       const request: ConnectRequest = {
         language: newLanguage,
-        role: props.role,
-        direction: reversed ? Direction.InterpretationToMainRoom : Direction.MainRoomToInterpretation
+        role: props.role
       }
       await Interpretation.connect(request)
     }
   }
 
   const handleChangeDirection = async (): Promise<void> => {
-    const newValue = !reversed
-    setReversed(newValue)
-    // TODO: To change direction in the channel
+    console.log('Changing direction')
+    await Interpretation.changeDirection(
+      reversed
+        ? Direction.MainRoomToInterpretation
+        : Direction.InterpretationToMainRoom
+    )
+    setReversed(!reversed)
   }
 
   return (
-    <div className={clsx('AdvanceLanguageSelector', { reversed })}>
+    <div
+      className={clsx('AdvanceLanguageSelector', { reversed })}
+      data-testid='AdvanceLanguageSelector'
+    >
 
       <Select className='FromSelect Select' isFullWidth
         label={reversed ? 'To' : 'From'}
@@ -55,7 +61,10 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
         }]}
       />
 
-      <button className='exchange' onClick={() => { handleChangeDirection().catch((e) => { console.error(e) }) }}>
+      <button
+        className='exchange'
+        aria-label='exchange button'
+        onClick={() => { handleChangeDirection().catch((e) => { console.error(e) }) }}>
         <img src='exchange.svg' />
       </button>
 

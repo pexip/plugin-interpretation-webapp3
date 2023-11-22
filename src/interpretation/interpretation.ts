@@ -15,6 +15,8 @@ import { getUser } from '../user'
 import { Role } from '../types/Role'
 import { showErrorPrompt } from '../prompts'
 import { Direction } from '../types/Direction'
+import { MainRoomMuteButtons } from '../main-room/mute-buttons'
+import { MainRoomVolume } from '../main-room/volume'
 
 const deviceIdStorageKey = 'PexInterpretation:deviceId'
 
@@ -39,13 +41,12 @@ interface ConnectRequest {
   language: Language
   role: Role
   pin?: string
-  direction?: Direction
 }
 
 const connect = async (request: ConnectRequest): Promise<void> => {
   currentLanguage = request.language
   currentRole = request.role
-  currentDirection = request.direction ?? Direction.MainRoomToInterpretation
+  currentDirection = Direction.MainRoomToInterpretation
 
   if (!signalsInitialized) {
     initializeInfinityClientSignals(clientSignals)
@@ -84,6 +85,12 @@ const connect = async (request: ConnectRequest): Promise<void> => {
     stopStream(mediaStream)
     throw e
   }
+
+  MainRoomMuteButtons.disable(true)
+}
+
+const changeDirection = async (direction: Direction): Promise<void> => {
+  await Promise.resolve()
 }
 
 const setAudioMuted = async (mute: boolean): Promise<void> => {
@@ -105,10 +112,7 @@ const getCurrentLanguage = (): Language | null => currentLanguage
 
 const setMainRoomVolume = (volume: number): void => {
   mainRoomVolume = volume
-  const remoteVideo = parent.document.querySelector("[data-testid='video-meeting']") as HTMLVideoElement
-  if (remoteVideo != null) {
-    remoteVideo.volume = mainRoomVolume
-  }
+  MainRoomVolume.set(volume)
 }
 
 const getMainRoomVolume = (): number => mainRoomVolume
@@ -123,6 +127,7 @@ const leave = async (): Promise<void> => {
   handleChangeCallback(null, Direction.MainRoomToInterpretation)
   audio.pause()
   setMainRoomVolume(1)
+  MainRoomMuteButtons.disable(false)
 }
 
 const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
@@ -191,6 +196,7 @@ const stopStream = (stream: MediaStream | undefined): void => {
 export const Interpretation = {
   registerOnChangeLanguageCallback,
   connect,
+  changeDirection,
   setAudioMuted,
   setAudioInputDevice,
   getAudioInputDevice,

@@ -8,10 +8,11 @@ import { initializeIFrame } from './iframe'
 import { Widget } from './Widget/Widget'
 import { ThemeProvider } from '@pexip/components'
 import { Interpretation } from './interpretation/interpretation'
-import { setMainRoomVolume, muteMainRoomAudio } from './main-room'
 import { config } from './config'
 import { Role } from './types/Role'
 import type { Language } from './types/Language'
+import { MainRoomMuteButtons } from './main-room/mute-buttons'
+import { MainRoomVolume } from './main-room/volume'
 
 export const App = (): JSX.Element => {
   const [visible, setVisible] = useState(false)
@@ -32,13 +33,13 @@ export const App = (): JSX.Element => {
       Interpretation.registerOnChangeLanguageCallback((language, direction) => {
         if (language != null) {
           if (config.role === Role.Interpreter) {
-            muteMainRoomAudio()
+            MainRoomMuteButtons.mute(true)
           } else {
-            setMainRoomVolume(0.1)
+            MainRoomVolume.set(0.1)
           }
         } else {
           if (config.role === Role.Listener) {
-            setMainRoomVolume(1)
+            MainRoomVolume.set(1)
           }
           plugin.ui.showToast({ message: 'Left interpretation room' }).catch((e) => { console.error(e) })
         }
@@ -52,7 +53,6 @@ export const App = (): JSX.Element => {
 
   return (
     <ThemeProvider colorScheme='light'>
-      <span>{visible.toString()}</span>
       {language != null && visible &&
         <Widget
           defaultLanguage={language}
