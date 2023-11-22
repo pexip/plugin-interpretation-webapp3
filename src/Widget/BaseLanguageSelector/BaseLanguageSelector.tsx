@@ -1,12 +1,17 @@
 import React, { useState } from 'react'
-import { getLanguageByCode, getLanguageOptions, type Language } from '../../language'
+
+import { getLanguageByCode, getLanguageOptions } from '../../language'
+import type { Language } from '../../types/Language'
 import { Select } from '@pexip/components'
+import { type ConnectRequest, Interpretation } from '../../interpretation/interpretation'
+import { Direction } from '../../types/Direction'
+import type { Role } from '../../types/Role'
 
 import './BaseLanguageSelector.scss'
-import { Interpretation } from '../../interpretation/interpretation'
 
 interface BaseLanguageSelectorProps {
   defaultLanguage: Language
+  role: Role
 }
 
 export const BaseLanguageSelector = (props: BaseLanguageSelectorProps): JSX.Element => {
@@ -16,7 +21,12 @@ export const BaseLanguageSelector = (props: BaseLanguageSelectorProps): JSX.Elem
     const language = getLanguageByCode(code)
     setLanguage(language)
     if (language != null) {
-      await Interpretation.connect(language)
+      const request: ConnectRequest = {
+        language,
+        role: props.role,
+        direction: Direction.MainRoomToInterpretation
+      }
+      await Interpretation.connect(request)
     }
   }
 

@@ -1,13 +1,18 @@
 import React, { useState } from 'react'
 
 import { Select } from '@pexip/components'
-import { type Language, getLanguageOptions, getLanguageByCode } from '../../language'
+import { getLanguageOptions, getLanguageByCode } from '../../language'
+import type { Language } from '../../types/Language'
+import { type ConnectRequest, Interpretation } from '../../interpretation/interpretation'
+import { Direction } from '../../types/Direction'
+import type { Role } from '../../types/Role'
+import clsx from 'clsx'
 
 import './AdvanceLanguageSelector.scss'
-import { Interpretation } from '../../interpretation/interpretation'
 
 interface AdvanceLanguageSelectorProps {
   defaultLanguage: Language
+  role: Role
 }
 
 export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JSX.Element => {
@@ -21,22 +26,23 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
       setLanguage(newLanguage)
     }
     if (newLanguage != null) {
-      await Interpretation.connect(newLanguage)
+      const request: ConnectRequest = {
+        language: newLanguage,
+        role: props.role,
+        direction: reversed ? Direction.InterpretationToMainRoom : Direction.MainRoomToInterpretation
+      }
+      await Interpretation.connect(request)
     }
   }
 
   const handleChangeDirection = async (): Promise<void> => {
     const newValue = !reversed
-    setReversed(!newValue)
-  }
-
-  const classes = ['AdvanceLanguageSelectorProps']
-  if (reversed) {
-    classes.push('reversed')
+    setReversed(newValue)
+    // TODO: To change direction in the channel
   }
 
   return (
-    <div className={classes.join(' ')}>
+    <div className={clsx('AdvanceLanguageSelector', { reversed })}>
 
       <Select className='FromSelect Select' isFullWidth
         label={reversed ? 'To' : 'From'}

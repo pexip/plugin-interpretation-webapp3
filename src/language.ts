@@ -2,11 +2,7 @@ import { config } from './config'
 import { capitalizeFirstLetter } from './utils'
 
 import type { Option } from './types/Option'
-
-export interface Language {
-  code: string
-  name: string
-}
+import type { Language } from './types/Language'
 
 export const getLanguageByCode = (code: string): Language | undefined => {
   return config.languages.find((language) => language.code === code)

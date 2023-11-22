@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Role } from '../types/Role'
 import { showDisconnectPrompt } from '../prompts'
-import { type Language } from '../language'
+import { type Language } from '../types/Language'
 import { Settings } from './Settings/Settings'
 import { Volume } from './Volume/Volume'
 import { AdvanceLanguageSelector } from './AdvanceLanguageSelector/AdvanceLanguageSelector'
@@ -29,15 +29,21 @@ export const Widget = (props: WidgetProps): JSX.Element => {
       <div className='Container'>
         {props.role === Role.Interpreter && <>
           {props.allowChangeDirection &&
-            <AdvanceLanguageSelector defaultLanguage={props.defaultLanguage} />
+            <AdvanceLanguageSelector defaultLanguage={props.defaultLanguage}
+              role={Role.Interpreter}
+            />
           }
           {!props.allowChangeDirection &&
-            <BaseLanguageSelector defaultLanguage={props.defaultLanguage} />
+            <BaseLanguageSelector defaultLanguage={props.defaultLanguage}
+              role={Role.Interpreter}
+            />
           }
           <Settings />
         </>}
         {props.role === Role.Listener && <>
-          <BaseLanguageSelector defaultLanguage={props.defaultLanguage} />
+          <BaseLanguageSelector defaultLanguage={props.defaultLanguage}
+            role={Role.Listener}
+          />
           <Volume />
         </>}
       </div>

@@ -1,5 +1,5 @@
 import { ClientCallType } from '@pexip/infinity'
-import type { Language } from '../language'
+import type { Language } from '../types/Language'
 import { type ConnectRequest, Interpretation } from './interpretation'
 import { Role } from '../types/Role'
 import { testDevices } from '../__mocks__/mediaDevices'

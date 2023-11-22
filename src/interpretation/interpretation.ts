@@ -6,7 +6,7 @@ import {
   createInfinityClientSignals,
   type CallSignals
 } from '@pexip/infinity'
-import type { Language } from '../language'
+import type { Language } from '../types/Language'
 import { showPinForm } from '../forms'
 import { getPlugin } from '../plugin'
 import { config } from '../config'

@@ -2,9 +2,9 @@ import React from 'react'
 import { act, render, screen } from '@testing-library/react'
 import { App } from './App'
 import { type ConnectRequest, Interpretation } from './interpretation/interpretation'
-import type { Language } from './language'
 import type { Direction } from './types/Direction'
 import { Role } from './types/Role'
+import type { Language } from './types/Language'
 
 jest.mock('@pexip/plugin-api', () => ({
   registerPlugin: jest.fn()

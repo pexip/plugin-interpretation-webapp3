@@ -1,7 +1,8 @@
 import { config } from './config'
 import { type ConnectRequest, Interpretation } from './interpretation/interpretation'
-import { type Language, getLanguageByCode, getLanguageOptions } from './language'
+import { getLanguageByCode, getLanguageOptions } from './language'
 import { getPlugin } from './plugin'
+import type { Language } from './types/Language'
 
 export const showInterpreterForm = async (): Promise<void> => {
   const plugin = getPlugin()

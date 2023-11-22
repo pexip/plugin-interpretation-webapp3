@@ -8,10 +8,10 @@ import { initializeIFrame } from './iframe'
 import { Widget } from './Widget/Widget'
 import { ThemeProvider } from '@pexip/components'
 import { Interpretation } from './interpretation/interpretation'
-import type { Language } from './language'
 import { setMainRoomVolume, muteMainRoomAudio } from './main-room'
 import { config } from './config'
 import { Role } from './types/Role'
+import type { Language } from './types/Language'
 
 export const App = (): JSX.Element => {
   const [visible, setVisible] = useState(false)
