@@ -3,11 +3,11 @@ import React from 'react'
 import { Role } from '../types/Role'
 import { showDisconnectPrompt } from '../prompts'
 import { type Language } from '../types/Language'
-import { Settings } from './Settings/Settings'
 import { Volume } from './Volume/Volume'
 import { AdvanceLanguageSelector } from './AdvanceLanguageSelector/AdvanceLanguageSelector'
 import { BaseLanguageSelector } from './BaseLanguageSelector/BaseLanguageSelector'
 import { DraggableDialog } from './DraggableDialog/DraggableDialog'
+import { MuteButton } from './MuteButton/MuteButton'
 
 interface WidgetProps {
   defaultLanguage: Language
@@ -38,7 +38,7 @@ export const Widget = (props: WidgetProps): JSX.Element => {
               role={Role.Interpreter}
             />
           }
-          <Settings />
+          <MuteButton />
         </>}
         {props.role === Role.Listener && <>
           <BaseLanguageSelector defaultLanguage={props.defaultLanguage}

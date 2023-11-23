@@ -17,8 +17,7 @@ import { showErrorPrompt } from '../prompts'
 import { Direction } from '../types/Direction'
 import { MainRoomMuteButtons } from '../main-room/mute-buttons'
 import { MainRoomVolume } from '../main-room/volume'
-
-const deviceIdStorageKey = 'PexInterpretation:deviceId'
+import { MainRoomMediaConstraints } from '../main-room/media-constraints'
 
 const clientSignals = createInfinityClientSignals([])
 const callSignals = createCallSignals([])
@@ -96,17 +95,6 @@ const setAudioMuted = async (mute: boolean): Promise<void> => {
   await infinityClient.mute({ mute })
 }
 
-const setAudioInputDevice = async (deviceId: string): Promise<void> => {
-  localStorage.setItem(deviceIdStorageKey, deviceId)
-  stopStream(mediaStream)
-  mediaStream = await getMediaStream(deviceId)
-  infinityClient.setStream(mediaStream)
-}
-
-const getAudioInputDevice = (): string | null => {
-  return localStorage.getItem(deviceIdStorageKey)
-}
-
 const getCurrentLanguage = (): Language | null => currentLanguage
 
 const setInterpretationVolume = (volume: number): void => {
@@ -162,18 +150,17 @@ const initializeInfinityCallSignals = (signals: CallSignals): void => {
 
 const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
   let stream: MediaStream
-  if (deviceId == null) {
-    deviceId = localStorage.getItem(deviceIdStorageKey) ?? undefined
-  }
-  const audio = deviceId != null ? { deviceId } : true
+
+  const mainRoomConstraints = MainRoomMediaConstraints.get()
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      audio,
+      audio: mainRoomConstraints?.audio ?? true,
       video: false
     })
     const audioTracks = stream.getAudioTracks()
     console.log('Using audio device: ' + audioTracks[0].label)
   } catch (e) {
+    console.error(e)
     const plugin = getPlugin()
     await plugin.ui.showToast({ message: 'Interpretation cannot access the microphone' })
     throw e
@@ -185,13 +172,17 @@ const stopStream = (stream: MediaStream | undefined): void => {
   stream?.getTracks().forEach((track) => { track.stop() })
 }
 
+// const setAudioInputDevice = async (deviceId: string): Promise<void> => {
+//   stopStream(mediaStream)
+//   mediaStream = await getMediaStream(deviceId)
+//   infinityClient.setStream(mediaStream)
+// }
+
 export const Interpretation = {
   registerOnChangeLanguageCallback,
   connect,
   changeDirection,
   setAudioMuted,
-  setAudioInputDevice,
-  getAudioInputDevice,
   getCurrentLanguage,
   setInterpretationVolume,
   leave

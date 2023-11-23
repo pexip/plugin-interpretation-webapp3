@@ -2,7 +2,6 @@ import { ClientCallType } from '@pexip/infinity'
 import type { Language } from '../types/Language'
 import { type ConnectRequest, Interpretation } from './interpretation'
 import { Role } from '../types/Role'
-import { testDevices } from '../__mocks__/mediaDevices'
 import { mockLocalStorage } from '../__mocks__/mockLocalStorage'
 import { Direction } from '../types/Direction'
 
@@ -47,6 +46,13 @@ jest.mock('@pexip/infinity', () => {
   }
 }, { virtual: true })
 
+jest.mock('../main-room/media-constraints', () => ({
+  MainRoomMediaConstraints: {
+    get: jest.fn(),
+    emitter: jest.fn()
+  }
+}))
+
 const mockSetMainRoomVolume = jest.fn()
 jest.mock('../main-room/volume', () => ({
   MainRoomVolume: {
@@ -72,6 +78,10 @@ jest.mock('../conference', () => ({
   getMainConferenceAlias: () => mainRoom
 }))
 
+const pauseStub = jest
+  .spyOn(window.HTMLMediaElement.prototype, 'pause')
+  .mockImplementation(() => {})
+
 const language: Language = {
   code: '0034',
   name: 'Spanish'
@@ -85,6 +95,7 @@ describe('Interpretation', () => {
     mockDisconnect.mockClear()
     mockChangeCallback.mockClear()
     mockSetMainRoomVolume.mockClear()
+    pauseStub.mockClear()
   })
 
   describe('registerOnChangeLanguageCallback', () => {
@@ -169,30 +180,21 @@ describe('Interpretation', () => {
     })
   })
 
-  describe('setAudioInputDevice', () => {
-    it('should save the deviceId in the local storage', async () => {
-      const deviceId = testDevices[0].deviceId
-      await Interpretation.setAudioInputDevice(deviceId)
-      const savedDeviceId = localStorage.getItem('PexInterpretation:deviceId')
-      expect(savedDeviceId).toBe(deviceId)
-    })
-    it('should obtain a new mediaStream with the deviceId', async () => {
-      const expectedDeviceId = testDevices[1].deviceId
-      await Interpretation.setAudioInputDevice(expectedDeviceId)
-      const audioTracks = (window as any).currentAudioTracks
-      const deviceId = audioTracks[0].deviceId
-      expect(deviceId).toBe(expectedDeviceId)
-    })
-  })
-
-  describe('getAudioInputDevice', () => {
-    it('should retrieve tha deviceId from localStorage', () => {
-      const expectedDeviceId = testDevices[0].deviceId
-      localStorage.setItem('PexInterpretation:deviceId', expectedDeviceId)
-      const deviceId = Interpretation.getAudioInputDevice()
-      expect(deviceId).toBe(expectedDeviceId)
-    })
-  })
+  // describe('setAudioInputDevice', () => {
+  //   it('should save the deviceId in the local storage', async () => {
+  //     const deviceId = testDevices[0].deviceId
+  //     await Interpretation.setAudioInputDevice(deviceId)
+  //     const savedDeviceId = localStorage.getItem('PexInterpretation:deviceId')
+  //     expect(savedDeviceId).toBe(deviceId)
+  //   })
+  //   it('should obtain a new mediaStream with the deviceId', async () => {
+  //     const expectedDeviceId = testDevices[1].deviceId
+  //     await Interpretation.setAudioInputDevice(expectedDeviceId)
+  //     const audioTracks = (window as any).currentAudioTracks
+  //     const deviceId = audioTracks[0].deviceId
+  //     expect(deviceId).toBe(expectedDeviceId)
+  //   })
+  // })
 
   describe('getCurrentLanguage', () => {
     it('should return the current language', async () => {
@@ -256,6 +258,17 @@ describe('Interpretation', () => {
       await Interpretation.leave()
       expect(mockSetMainRoomVolume).toHaveBeenCalledTimes(1)
       expect(mockSetMainRoomVolume).toHaveBeenCalledWith(1)
+    })
+
+    it('should pause the interpretation audio', async () => {
+      const request: ConnectRequest = {
+        language,
+        role: Role.Listener
+      }
+      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
+      await Interpretation.connect(request)
+      await Interpretation.leave()
+      expect(pauseStub).toHaveBeenCalledTimes(1)
     })
   })
 })
