@@ -4,6 +4,7 @@ import { RangeSlider } from '@pexip/components'
 import { Interpretation } from '../../interpretation/interpretation'
 
 import './Volume.scss'
+import { MainRoomVolume } from '../../main-room/volume'
 
 export const Volume = (): JSX.Element => {
   const [volume, setVolume] = useState<number>(0)
@@ -13,7 +14,7 @@ export const Volume = (): JSX.Element => {
     setVolume(volume)
     const volumeMainRoom = (100 - Math.max((volume - 50) * 2, 0)) / 100
     const volumeInterpretation = Math.min(volume * 2, 100) / 100
-    Interpretation.setMainRoomVolume(volumeMainRoom)
+    MainRoomVolume.set(volumeMainRoom)
     Interpretation.setInterpretationVolume(volumeInterpretation)
     console.log(`Volume Main Room: ${volumeMainRoom}`)
     console.log(`Volume Interpreter: ${volumeInterpretation}`)

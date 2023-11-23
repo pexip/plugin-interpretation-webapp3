@@ -10,8 +10,14 @@ const mockSetMainRoomVolume = jest.fn()
 const mockSetInterpretationVolume = jest.fn()
 jest.mock('../../interpretation/interpretation', () => ({
   Interpretation: {
-    setMainRoomVolume: (volume: number) => mockSetMainRoomVolume(volume),
+    // setMainRoomVolume: (volume: number) => mockSetMainRoomVolume(volume),
     setInterpretationVolume: (volume: number) => mockSetInterpretationVolume(volume)
+  }
+}))
+
+jest.mock('../../main-room/volume', () => ({
+  MainRoomVolume: {
+    set: (volume: number) => mockSetMainRoomVolume(volume)
   }
 }))
 

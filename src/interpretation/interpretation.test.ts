@@ -47,6 +47,13 @@ jest.mock('@pexip/infinity', () => {
   }
 }, { virtual: true })
 
+const mockSetMainRoomVolume = jest.fn()
+jest.mock('../main-room/volume', () => ({
+  MainRoomVolume: {
+    set: (volume: number) => mockSetMainRoomVolume(volume)
+  }
+}))
+
 const uuid = 'my-uuid'
 const displayName = 'my-display-name'
 jest.mock('../user', () => ({
@@ -77,6 +84,7 @@ describe('Interpretation', () => {
     mockSetStream.mockClear()
     mockDisconnect.mockClear()
     mockChangeCallback.mockClear()
+    mockSetMainRoomVolume.mockClear()
   })
 
   describe('registerOnChangeLanguageCallback', () => {
@@ -245,10 +253,9 @@ describe('Interpretation', () => {
       }
       Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
-      Interpretation.setMainRoomVolume(0.5)
       await Interpretation.leave()
-      const volume = Interpretation.getMainRoomVolume()
-      expect(volume).toBe(1)
+      expect(mockSetMainRoomVolume).toHaveBeenCalledTimes(1)
+      expect(mockSetMainRoomVolume).toHaveBeenCalledWith(1)
     })
   })
 })

@@ -31,7 +31,6 @@ let currentRole: Role | null = null
 let currentDirection: Direction = Direction.MainRoomToInterpretation
 let signalsInitialized: boolean = false
 let mediaStream: MediaStream | undefined
-let mainRoomVolume: number = 1
 
 const registerOnChangeLanguageCallback = (callback: (language: Language | null, direction: Direction) => void): void => {
   handleChangeCallback = callback
@@ -110,13 +109,6 @@ const getAudioInputDevice = (): string | null => {
 
 const getCurrentLanguage = (): Language | null => currentLanguage
 
-const setMainRoomVolume = (volume: number): void => {
-  mainRoomVolume = volume
-  MainRoomVolume.set(volume)
-}
-
-const getMainRoomVolume = (): number => mainRoomVolume
-
 const setInterpretationVolume = (volume: number): void => {
   audio.volume = volume
 }
@@ -126,7 +118,7 @@ const leave = async (): Promise<void> => {
   currentLanguage = null
   handleChangeCallback(null, Direction.MainRoomToInterpretation)
   audio.pause()
-  setMainRoomVolume(1)
+  MainRoomVolume.set(1)
   MainRoomMuteButtons.disable(false)
 }
 
@@ -201,8 +193,6 @@ export const Interpretation = {
   setAudioInputDevice,
   getAudioInputDevice,
   getCurrentLanguage,
-  setMainRoomVolume,
-  getMainRoomVolume,
   setInterpretationVolume,
   leave
 }
