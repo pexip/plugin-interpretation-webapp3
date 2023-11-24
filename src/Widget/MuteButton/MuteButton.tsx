@@ -1,13 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Button, Icon, IconTypes } from '@pexip/components'
+import clsx from 'clsx'
 
 import './MuteButton.scss'
 
-export const MuteButton = (): JSX.Element => {
+interface MuteButtonProps {
+  label?: string
+}
+
+export const MuteButton = (props: MuteButtonProps): JSX.Element => {
+  const [muted, setMuted] = useState(false)
+
   return (
-    <Button className='MuteButton' data-testid='MuteButton' variant='bordered'>
-      <Icon source={IconTypes.IconMicrophoneOn} />
-      <span>Mute in Main floor</span>
+    <Button className={clsx('MuteButton', { muted })} data-testid='MuteButton' variant='bordered'
+      onClick={() => { setMuted(!muted) }}>
+      <Icon source={muted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
+      <span>{muted ? 'Unmute' : 'Mute'} {props.label}</span>
     </Button>
   )
 }

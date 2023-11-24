@@ -1,13 +1,34 @@
 .MuteButton {
   margin: 1em;
   margin-top: 0;
+  box-shadow: 0 0 0 1px inset #3c5974 !important;
 
-  svg {
+  svg, span {
+    margin: auto;
     color: rgb(60, 89, 116);
   }
 
-  span {
-    margin: auto;
-    color: rgb(60, 89, 116);
+  &:hover { 
+    background-color: #3c5974 !important;
+
+    svg, span {
+      color: white;
+    }
+  }
+
+  &.muted {
+    box-shadow: 0 0 0 1px inset #F24949 !important;
+
+    svg, span {
+      color: #F24949;
+    }
+
+    &:hover { 
+      background-color: #F24949 !important;
+  
+      svg, span {
+        color: white;
+      }
+    }
   }
 }

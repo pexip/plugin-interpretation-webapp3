@@ -1,47 +1,36 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { Select } from '@pexip/components'
 import { getLanguageOptions, getLanguageByCode } from '../../language'
 import type { Language } from '../../types/Language'
-import { type ConnectRequest, Interpretation } from '../../interpretation/interpretation'
-import type { Role } from '../../types/Role'
+import { Direction } from '../../types/Direction'
 import clsx from 'clsx'
 
 import './AdvanceLanguageSelector.scss'
-import { Direction } from '../../types/Direction'
 
 interface AdvanceLanguageSelectorProps {
-  defaultLanguage: Language
-  role: Role
+  language: Language
+  direction: Direction
+  onChangeLanguage: (language: Language) => void
+  onChangeDirection: (direction: Direction) => void
 }
 
 export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JSX.Element => {
-  const [language, setLanguage] = useState<Language>()
-  const [reversed, setReversed] = useState(false)
+  const reversed = props.direction === Direction.InterpretationToMainRoom
 
-  const handleChangeLanguage = async (code: string): Promise<void> => {
-    let newLanguage = language
-    if (code != null) {
-      newLanguage = getLanguageByCode(code)
-      setLanguage(newLanguage)
-    }
-    if (newLanguage != null) {
-      const request: ConnectRequest = {
-        language: newLanguage,
-        role: props.role
-      }
-      await Interpretation.connect(request)
+  const handleChangeLanguage = (code: string): void => {
+    const language = getLanguageByCode(code)
+    if (language != null) {
+      props.onChangeLanguage(language)
     }
   }
 
-  const handleChangeDirection = async (): Promise<void> => {
-    console.log('Changing direction')
-    await Interpretation.changeDirection(
-      reversed
-        ? Direction.MainRoomToInterpretation
-        : Direction.InterpretationToMainRoom
-    )
-    setReversed(!reversed)
+  const handleChangeDirection = (): void => {
+    let direction = Direction.MainRoomToInterpretation
+    if (props.direction === Direction.MainRoomToInterpretation) {
+      direction = Direction.InterpretationToMainRoom
+    }
+    props.onChangeDirection(direction)
   }
 
   return (
@@ -50,7 +39,7 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
       data-testid='AdvanceLanguageSelector'
     >
 
-      <Select className='FromSelect Select' isFullWidth
+      <Select className='MainFloorSelect Select' isFullWidth
         label={reversed ? 'To' : 'From'}
         value={'main'}
         isDisabled={true}
@@ -64,15 +53,16 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
       <button
         className='exchange'
         aria-label='exchange button'
-        onClick={() => { handleChangeDirection().catch((e) => { console.error(e) }) }}>
+        onClick={handleChangeDirection}>
         <img src='exchange.svg' />
       </button>
 
-      <Select className='ToSelect Select' isFullWidth
+      <Select className='LanguageSelect Select' isFullWidth
+        aria-label='language select'
         label={reversed ? 'From' : 'To'}
-        value={language?.code ?? props.defaultLanguage.code}
+        value={props.language.code}
         options={getLanguageOptions()}
-        onValueChange={(code: string) => { handleChangeLanguage(code).catch((e) => { console.error(e) }) }}
+        onValueChange={handleChangeLanguage}
       />
 
     </div>

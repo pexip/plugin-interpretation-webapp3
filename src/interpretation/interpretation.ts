@@ -87,8 +87,14 @@ const connect = async (request: ConnectRequest): Promise<void> => {
   MainRoomMuteButtons.disable(true)
 }
 
-const changeDirection = async (direction: Direction): Promise<void> => {
+const setDirection = async (direction: Direction): Promise<void> => {
+  currentDirection = direction
   await Promise.resolve()
+}
+
+const getDirection = (): Direction => {
+  console.log(currentDirection)
+  return currentDirection
 }
 
 const setAudioMuted = async (mute: boolean): Promise<void> => {
@@ -181,7 +187,8 @@ const stopStream = (stream: MediaStream | undefined): void => {
 export const Interpretation = {
   registerOnChangeLanguageCallback,
   connect,
-  changeDirection,
+  setDirection,
+  getDirection,
   setAudioMuted,
   getCurrentLanguage,
   setInterpretationVolume,
