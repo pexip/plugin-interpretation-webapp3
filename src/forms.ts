@@ -46,7 +46,7 @@ export const showPinForm = async (): Promise<void> => {
   })
   if (input.pin != null) {
     const request: ConnectRequest = {
-      language: Interpretation.getCurrentLanguage() as Language,
+      language: Interpretation.getLanguage() as Language,
       role: config.role,
       pin: input.pin
     }

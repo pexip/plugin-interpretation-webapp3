@@ -2,7 +2,6 @@ import React from 'react'
 import { act, render, screen } from '@testing-library/react'
 import { App } from './App'
 import { type ConnectRequest, Interpretation } from './interpretation/interpretation'
-import type { Direction } from './types/Direction'
 import { Role } from './types/Role'
 import type { Language } from './types/Language'
 
@@ -28,11 +27,20 @@ jest.mock('./events', () => ({
 }))
 
 jest.mock('./interpretation/interpretation', () => {
-  let languageCallback: (language: Language, direction: Direction) => void
+  let callback: () => void
+  let currentLanguage: Language
+
   return {
     Interpretation: {
-      registerOnChangeLanguageCallback: jest.fn((callback) => { languageCallback = callback }),
-      connect: jest.fn((language, direction) => { languageCallback(language, direction) })
+      connect: jest.fn((request) => {
+        currentLanguage = request.language
+        Interpretation.emitter.emit('changed')
+      }),
+      getLanguage: () => currentLanguage,
+      emitter: {
+        emit: (event: string) => { if (event === 'changed') callback() },
+        on: (event: string, newCallback: () => void) => { if (event === 'changed') callback = newCallback }
+      }
     }
   }
 })

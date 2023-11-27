@@ -13,6 +13,7 @@ export const initializeEvents = (): void => {
   plugin.events.authenticatedWithConference.add(handleAuthenticatedWithConference)
   plugin.events.me.add(handleMe)
   plugin.events.participants.add(handleParticipants)
+  plugin.events.disconnected.add(handleDisconnected)
 }
 
 const handleAuthenticatedWithConference = (event: AuthenticatedWithConferenceEvent): void => {
@@ -27,4 +28,8 @@ const handleParticipants = (): void => {
   // Reset the volume in the video HTML element. This is needed because the web
   // app can re-create the element when a new participant joins.
   MainRoomVolume.refresh()
+}
+
+const handleDisconnected = async (): Promise<void> => {
+  await Interpretation.leave()
 }

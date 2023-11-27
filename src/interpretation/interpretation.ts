@@ -18,28 +18,31 @@ import { Direction } from '../types/Direction'
 import { MainRoomMuteButtons } from '../main-room/mute-buttons'
 import { MainRoomVolume } from '../main-room/volume'
 import { MainRoomMediaConstraints } from '../main-room/media-constraints'
+import EventEmitter from 'eventemitter3'
 
 const clientSignals = createInfinityClientSignals([])
 const callSignals = createCallSignals([])
 const infinityClient = createInfinityClient(clientSignals, callSignals)
 const audio: HTMLAudioElement = new Audio()
 
-let handleChangeCallback: (language: Language | null, direction: Direction) => void
 let currentLanguage: Language | null = null
 let currentRole: Role | null = null
 let currentDirection: Direction = Direction.MainRoomToInterpretation
 let signalsInitialized: boolean = false
 let mediaStream: MediaStream | undefined
 
-const registerOnChangeLanguageCallback = (callback: (language: Language | null, direction: Direction) => void): void => {
-  handleChangeCallback = callback
-}
-
 interface ConnectRequest {
   language: Language
   role: Role
   pin?: string
 }
+
+interface InterpretationChanges {
+  language: Language | null
+  direction: Direction
+}
+
+const emitter = new EventEmitter<'changed' | 'minimized'>()
 
 const connect = async (request: ConnectRequest): Promise<void> => {
   currentLanguage = request.language
@@ -101,19 +104,23 @@ const setAudioMuted = async (mute: boolean): Promise<void> => {
   await infinityClient.mute({ mute })
 }
 
-const getCurrentLanguage = (): Language | null => currentLanguage
+const getLanguage = (): Language | null => currentLanguage
 
 const setInterpretationVolume = (volume: number): void => {
   audio.volume = volume
 }
 
+const minimize = (minimized: boolean): void => {
+  emitter.emit('minimized', minimized)
+}
+
 const leave = async (): Promise<void> => {
   await infinityClient.disconnect({ reason: 'User initiated disconnect' })
   currentLanguage = null
-  handleChangeCallback(null, Direction.MainRoomToInterpretation)
   audio.pause()
   MainRoomVolume.set(1)
   MainRoomMuteButtons.disable(false)
+  emitter.emit('changed')
 }
 
 const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
@@ -140,7 +147,11 @@ const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
     // TODO: What to do when no PIN for guest
   })
   signals.onAuthenticatedWithConference.add(async () => {
-    handleChangeCallback(currentLanguage, currentDirection)
+    const changes: InterpretationChanges = {
+      language: currentLanguage,
+      direction: currentDirection
+    }
+    emitter.emit('changed', changes)
   })
   signals.onError.add(async ({ error, errorCode }): Promise<void> => {
     await showErrorPrompt(error)
@@ -178,21 +189,16 @@ const stopStream = (stream: MediaStream | undefined): void => {
   stream?.getTracks().forEach((track) => { track.stop() })
 }
 
-// const setAudioInputDevice = async (deviceId: string): Promise<void> => {
-//   stopStream(mediaStream)
-//   mediaStream = await getMediaStream(deviceId)
-//   infinityClient.setStream(mediaStream)
-// }
-
 export const Interpretation = {
-  registerOnChangeLanguageCallback,
   connect,
   setDirection,
   getDirection,
   setAudioMuted,
-  getCurrentLanguage,
+  getLanguage,
   setInterpretationVolume,
-  leave
+  minimize,
+  leave,
+  emitter
 }
 
 export type {

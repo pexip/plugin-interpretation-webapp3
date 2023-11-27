@@ -30,8 +30,10 @@ export const App = (): JSX.Element => {
       await initializeButton()
       initializeIFrame()
 
-      Interpretation.registerOnChangeLanguageCallback((language, direction) => {
+      Interpretation.emitter.on('changed', () => {
+        const language = Interpretation.getLanguage()
         if (language != null) {
+          // TODO: We should differentiate between a new connection and change the language
           if (config.role === Role.Interpreter) {
             MainRoomMuteButtons.mute(true)
           } else {
@@ -46,6 +48,9 @@ export const App = (): JSX.Element => {
         setButtonActive(language != null).catch((e) => { console.error(e) })
         setLanguage(language)
         setVisible(true)
+      })
+      Interpretation.emitter.on('minimized', (minimized: boolean) => {
+        setVisible(!minimized)
       })
     }
     bootStrap().catch((e) => { console.error(e) })

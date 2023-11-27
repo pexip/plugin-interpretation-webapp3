@@ -1,7 +1,8 @@
 {
   "role": "interpreter",
+  "reusePin": true,
   "allowChangeDirection": true,
-  "defaultInterpretationVolume": 0.2,
+  "mainFloorVolume": 0.2,
   "languages": [
     {
       "code": "0033",

@@ -3,7 +3,6 @@ import type { Language } from '../types/Language'
 import { type ConnectRequest, Interpretation } from './interpretation'
 import { Role } from '../types/Role'
 import { mockLocalStorage } from '../__mocks__/mockLocalStorage'
-import { Direction } from '../types/Direction'
 
 // Create a mocks
 require('../__mocks__/mediaDevices');
@@ -13,7 +12,6 @@ const mockCall = jest.fn()
 const mockMute = jest.fn()
 const mockSetStream = jest.fn()
 const mockDisconnect = jest.fn()
-const mockChangeCallback = jest.fn()
 
 let onAuthenticatedWithConferenceCallback: () => void
 jest.mock('@pexip/infinity', () => {
@@ -93,32 +91,27 @@ describe('Interpretation', () => {
     mockMute.mockClear()
     mockSetStream.mockClear()
     mockDisconnect.mockClear()
-    mockChangeCallback.mockClear()
     mockSetMainRoomVolume.mockClear()
     pauseStub.mockClear()
   })
 
-  describe('registerOnChangeLanguageCallback', () => {
+  describe('emitter changed', () => {
     it('should be called on connect with new parameters', async () => {
+      const mockChanged = jest.fn()
       const request: ConnectRequest = {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
+      Interpretation.emitter.on('changed', mockChanged)
       await Interpretation.connect(request)
-      const expectedLanguage = language
-      const expectedDirection = Direction.MainRoomToInterpretation
-      expect(mockChangeCallback).toHaveBeenCalledTimes(1)
-      expect(mockChangeCallback).toHaveBeenCalledWith(expectedLanguage, expectedDirection)
+      expect(mockChanged).toHaveBeenCalledTimes(1)
     })
 
     it('should be called on leave', async () => {
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
+      const mockChanged = jest.fn()
+      Interpretation.emitter.on('changed', mockChanged)
       await Interpretation.leave()
-      const expectedLanguage = null
-      const expectedDirection = Direction.MainRoomToInterpretation
-      expect(mockChangeCallback).toHaveBeenCalledTimes(1)
-      expect(mockChangeCallback).toHaveBeenCalledWith(expectedLanguage, expectedDirection)
+      expect(mockChanged).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -180,31 +173,14 @@ describe('Interpretation', () => {
     })
   })
 
-  // describe('setAudioInputDevice', () => {
-  //   it('should save the deviceId in the local storage', async () => {
-  //     const deviceId = testDevices[0].deviceId
-  //     await Interpretation.setAudioInputDevice(deviceId)
-  //     const savedDeviceId = localStorage.getItem('PexInterpretation:deviceId')
-  //     expect(savedDeviceId).toBe(deviceId)
-  //   })
-  //   it('should obtain a new mediaStream with the deviceId', async () => {
-  //     const expectedDeviceId = testDevices[1].deviceId
-  //     await Interpretation.setAudioInputDevice(expectedDeviceId)
-  //     const audioTracks = (window as any).currentAudioTracks
-  //     const deviceId = audioTracks[0].deviceId
-  //     expect(deviceId).toBe(expectedDeviceId)
-  //   })
-  // })
-
-  describe('getCurrentLanguage', () => {
+  describe('getLanguage', () => {
     it('should return the current language', async () => {
       const request: ConnectRequest = {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
-      const currentLanguage = Interpretation.getCurrentLanguage()
+      const currentLanguage = Interpretation.getLanguage()
       expect(currentLanguage).toStrictEqual(request.language)
     })
   })
@@ -215,37 +191,21 @@ describe('Interpretation', () => {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
       await Interpretation.leave()
       expect(mockDisconnect).toHaveBeenCalledTimes(1)
       expect(mockDisconnect).toHaveBeenCalledWith({ reason: 'User initiated disconnect' })
     })
 
-    it('should clear the currentLanguage', async () => {
+    it('should clear the current language', async () => {
       const request: ConnectRequest = {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
       await Interpretation.leave()
-      const currentLanguage = Interpretation.getCurrentLanguage()
+      const currentLanguage = Interpretation.getLanguage()
       expect(currentLanguage).toBe(null)
-    })
-
-    it('should call the callback with language=null', async () => {
-      const request: ConnectRequest = {
-        language,
-        role: Role.Listener
-      }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
-      await Interpretation.connect(request)
-      await Interpretation.leave()
-      expect(mockChangeCallback).toHaveBeenCalledTimes(2)
-      const expectedLanguage = null
-      const expectedDirection = Direction.MainRoomToInterpretation
-      expect(mockChangeCallback).toHaveBeenCalledWith(expectedLanguage, expectedDirection)
     })
 
     it('should set the main room volume to 100%', async () => {
@@ -253,7 +213,6 @@ describe('Interpretation', () => {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
       await Interpretation.leave()
       expect(mockSetMainRoomVolume).toHaveBeenCalledTimes(1)
@@ -265,7 +224,6 @@ describe('Interpretation', () => {
         language,
         role: Role.Listener
       }
-      Interpretation.registerOnChangeLanguageCallback(mockChangeCallback)
       await Interpretation.connect(request)
       await Interpretation.leave()
       expect(pauseStub).toHaveBeenCalledTimes(1)

@@ -3,7 +3,9 @@ import type { Role } from './types/Role'
 
 interface Config {
   role: Role
+  reusePin: boolean
   allowChangeDirection: boolean
+  mainFloorVolume: number
   languages: Language[]
 }
 

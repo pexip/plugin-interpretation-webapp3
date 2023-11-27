@@ -139,6 +139,9 @@ Here is an example of configuration:
 ```json
 {
   "role": "interpreter",
+  "allowChangeDirection": false,
+  "defaultInterpretationVolume": 0.8,
+  "reusePin": true,
   "languages": [
     {
       "code": "0033",
@@ -153,10 +156,13 @@ Here is an example of configuration:
 }
 ```
 
-| Parameter | Description |
-|-----------|-------------|
-| role | Indicates the role of the user that joins to the interpretation. We have two different roles: `interpreter` and `listener`.
-| languages | The list of all the available languages. Each language will have two values: `code` and `name`. The `code` is the subfix that will be attached to the conference name. For example, if for the main conference we have `conferenceAlias=123` and `code=0033`, the system will create a new audio conference with `conferenceAlias=1230033`. The `name` is used for the UI elements, such as selectors.
+| Parameter | type | Description |
+|-----------|------|-------------|
+| role | 'interpreter' \| 'listener' |Indicates the role of the user that joins to the interpretation. We have two different roles: `interpreter` and `listener`.
+| allowChangeDirection | boolean | If `true` the interpreter will be able to change the direction. He will be able to translate from the main floor to the interpretation room and the other way around. |
+| defaultMainFloorVolume | number | Float value between 0 and 1 that indicates the percentage of the main floor that the `listener` will hear when he is connected to the interpretation room. The user will be able to change this manually. |
+| reusePin | boolean | If `true` the application will reuse the pin of the main floor to the interpretation room. The only requirement is that the PIN should be included in the URL. It isn't supported if the user introduce the PIN manually. |
+| languages | {code: string, name: string}[] | The list of all the available languages. Each language will have two values: `code` and `name`. The `code` is the suffix that will be attached to the conference name. For example, if for the main conference we have `conferenceAlias=123` and `code=0033`, the system will create a new audio conference with `conferenceAlias=1230033`. The `name` is used for the UI elements, such as selectors.
 
 The parameter `allowChangeDirection` needs an additional explanation. With this parameter enabled, the interpreter can translate in both direction; from the main room to the interpretation room and the other way around. Here is a description of the behavior when the interpreter and listener are connected to the interpretation:
 

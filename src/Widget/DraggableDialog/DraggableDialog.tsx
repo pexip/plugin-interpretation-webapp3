@@ -2,13 +2,13 @@ import React, { useEffect, useRef } from 'react'
 
 import { Box, BoxHeader, Icon, IconTypes, Tooltip } from '@pexip/components'
 import { moveIFrame, toggleIFramePointerEvents } from '../../iframe'
+import { Interpretation } from '../../interpretation/interpretation'
+import { showDisconnectPrompt } from '../../prompts'
 
 import './DraggableDialog.scss'
 
 interface DraggableDialogProps {
   title: string
-  onMinimize: () => void
-  onClose: () => void
   children: JSX.Element
 }
 
@@ -51,11 +51,14 @@ export const DraggableDialog = (props: DraggableDialogProps): JSX.Element => {
         <span className='Title'>{props.title}</span>
 
         <Tooltip text='Hide dialog' position='bottomLeft'>
-          <Icon className='Minimize' source={IconTypes.IconMinus} onClick={() => { props.onMinimize() }}/>
+          <Icon className='Minimize' source={IconTypes.IconMinus}
+            onClick={() => { Interpretation.minimize(true) }
+          }/>
         </Tooltip>
 
         <Tooltip text='Leave interpretation' position='bottomLeft'>
-          <Icon className='Close' source={IconTypes.IconClose} onClick={() => { props.onClose() }}/>
+          <Icon className='Close' source={IconTypes.IconClose}
+          onClick={() => { showDisconnectPrompt().catch((e) => { console.error(e) }) }}/>
         </Tooltip>
       </BoxHeader>
       {props.children}

@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+
 import { Button, Icon, IconTypes } from '@pexip/components'
 import clsx from 'clsx'
 
@@ -10,6 +11,10 @@ interface MuteButtonProps {
 
 export const MuteButton = (props: MuteButtonProps): JSX.Element => {
   const [muted, setMuted] = useState(false)
+
+  useEffect(() => {
+    // TODO: Get the initial value from the interpretation service
+  }, [])
 
   return (
     <Button className={clsx('MuteButton', { muted })} data-testid='MuteButton' variant='bordered'

@@ -1,7 +1,6 @@
 import { showInterpreterForm } from './forms'
 import { Interpretation } from './interpretation/interpretation'
 import { getPlugin } from './plugin'
-import { showDisconnectPrompt } from './prompts'
 import { isSameDomain } from './utils'
 
 import type { Button, ToolbarButtonPayload } from '@pexip/plugin-api'
@@ -33,8 +32,8 @@ export const setButtonActive = async (active: boolean): Promise<void> => {
 
 const handleOnClick = async (): Promise<void> => {
   if (isSameDomain()) {
-    if (Interpretation.getCurrentLanguage() != null) {
-      await showDisconnectPrompt()
+    if (Interpretation.getLanguage() != null) {
+      Interpretation.minimize(false)
     } else {
       await showInterpreterForm()
     }
