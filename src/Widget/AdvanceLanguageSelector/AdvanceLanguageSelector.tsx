@@ -2,35 +2,31 @@ import React from 'react'
 
 import { Select } from '@pexip/components'
 import { getLanguageOptions, getLanguageByCode } from '../../language'
-import type { Language } from '../../types/Language'
 import { Direction } from '../../types/Direction'
+import { useInterpretationContext } from '../../InterpretationContext/InterpretationContext'
 import clsx from 'clsx'
 
 import './AdvanceLanguageSelector.scss'
 
-interface AdvanceLanguageSelectorProps {
-  language: Language
-  direction: Direction
-  onChangeLanguage: (language: Language) => void
-  onChangeDirection: (direction: Direction) => void
-}
+export const AdvanceLanguageSelector = (): JSX.Element => {
+  const { changeLanguage, changeDirection, state } = useInterpretationContext()
+  const { language, direction } = state
 
-export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JSX.Element => {
-  const reversed = props.direction === Direction.InterpretationToMainRoom
+  const reversed = direction === Direction.InterpretationToMainRoom
 
-  const handleChangeLanguage = (code: string): void => {
+  const handleChangeLanguage = async (code: string): Promise<void> => {
     const language = getLanguageByCode(code)
     if (language != null) {
-      props.onChangeLanguage(language)
+      await changeLanguage(language)
     }
   }
 
-  const handleChangeDirection = (): void => {
-    let direction = Direction.MainRoomToInterpretation
-    if (props.direction === Direction.MainRoomToInterpretation) {
-      direction = Direction.InterpretationToMainRoom
+  const handleChangeDirection = async (): Promise<void> => {
+    let newDirection = Direction.MainRoomToInterpretation
+    if (direction === Direction.MainRoomToInterpretation) {
+      newDirection = Direction.InterpretationToMainRoom
     }
-    props.onChangeDirection(direction)
+    await changeDirection(newDirection)
   }
 
   return (
@@ -53,16 +49,16 @@ export const AdvanceLanguageSelector = (props: AdvanceLanguageSelectorProps): JS
       <button
         className='exchange'
         aria-label='exchange button'
-        onClick={handleChangeDirection}>
+        onClick={() => { handleChangeDirection().catch((e) => { console.error(e) }) }}>
         <img src='exchange.svg' />
       </button>
 
       <Select className='LanguageSelect Select' isFullWidth
         aria-label='language select'
         label={reversed ? 'From' : 'To'}
-        value={props.language.code}
+        value={language?.code ?? ''}
         options={getLanguageOptions()}
-        onValueChange={handleChangeLanguage}
+        onValueChange={(code: string) => { handleChangeLanguage(code).catch((e) => { console.error(e) }) }}
       />
 
     </div>

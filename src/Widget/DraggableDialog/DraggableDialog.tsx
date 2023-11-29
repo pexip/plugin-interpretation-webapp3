@@ -2,10 +2,10 @@ import React, { useEffect, useRef } from 'react'
 
 import { Box, BoxHeader, Icon, IconTypes, Tooltip } from '@pexip/components'
 import { moveIFrame, toggleIFramePointerEvents } from '../../iframe'
-import { Interpretation } from '../../interpretation/interpretation'
 import { showDisconnectPrompt } from '../../prompts'
 
 import './DraggableDialog.scss'
+import { useInterpretationContext } from '../../InterpretationContext/InterpretationContext'
 
 interface DraggableDialogProps {
   title: string
@@ -13,6 +13,8 @@ interface DraggableDialogProps {
 }
 
 export const DraggableDialog = (props: DraggableDialogProps): JSX.Element => {
+  const { minimize } = useInterpretationContext()
+
   const refDragButton = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export const DraggableDialog = (props: DraggableDialogProps): JSX.Element => {
 
         <Tooltip text='Hide dialog' position='bottomLeft'>
           <Icon className='Minimize' source={IconTypes.IconMinus}
-            onClick={() => { Interpretation.minimize(true) }
+            onClick={() => { minimize(true) }
           }/>
         </Tooltip>
 

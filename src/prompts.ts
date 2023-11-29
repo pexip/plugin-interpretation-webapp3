@@ -1,5 +1,11 @@
-import { Interpretation } from './interpretation/interpretation'
 import { getPlugin } from './plugin'
+import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
+
+let interpretationContext: InterpretationContextType
+
+export const refreshContextPrompts = (context: InterpretationContextType): void => {
+  interpretationContext = context
+}
 
 export const showDisconnectPrompt = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -17,7 +23,7 @@ export const showDisconnectPrompt = async (): Promise<void> => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      await Interpretation.leave()
+      await interpretationContext.disconnect()
     }
   })
 }

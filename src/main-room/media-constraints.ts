@@ -1,4 +1,4 @@
-import EventEmitter from 'eventemitter3'
+// import EventEmitter from 'eventemitter3'
 
 let mediaConstraints: MediaStreamConstraints | null = null
 
@@ -6,7 +6,7 @@ const getConstraints = (): MediaStreamConstraints | null => {
   return mediaConstraints
 }
 
-const emitter = new EventEmitter()
+// const emitter = new EventEmitter()
 
 const overrideGetUserMedia = (): void => {
   const callback = parent.navigator.mediaDevices.getUserMedia
@@ -24,15 +24,15 @@ const processConstraints = (constraints?: MediaStreamConstraints): void => {
   const settingsModal = parent.document.querySelector('div[data-testid=modal-settings]')
   if (settingsModal == null) {
     mediaConstraints = constraints ?? null
-    emitter.emit('changed', constraints)
+    // emitter.emit('changed', constraints)
   }
 }
 
 overrideGetUserMedia()
 
 const MainRoomMediaConstraints = {
-  get: getConstraints,
-  emitter
+  get: getConstraints
+  // emitter
 }
 
 export { MainRoomMediaConstraints }

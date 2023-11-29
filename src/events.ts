@@ -1,11 +1,17 @@
 import { setMainConferenceAlias } from './conference'
-import { Interpretation } from './interpretation/interpretation'
 import { MainRoomVolume } from './main-room/volume'
 import { getPlugin } from './plugin'
 import { getCleanParticipant, setUser } from './user'
+import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
 
 interface AuthenticatedWithConferenceEvent {
   conferenceAlias: string
+}
+
+let interpretationContext: InterpretationContextType
+
+export const refreshContextEvents = (context: InterpretationContextType): void => {
+  interpretationContext = context
 }
 
 export const initializeEvents = (): void => {
@@ -31,5 +37,5 @@ const handleParticipants = (): void => {
 }
 
 const handleDisconnected = async (): Promise<void> => {
-  await Interpretation.leave()
+  await interpretationContext.disconnect()
 }

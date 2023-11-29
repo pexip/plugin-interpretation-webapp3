@@ -1,26 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 import { Button, Icon, IconTypes } from '@pexip/components'
+import { useInterpretationContext } from '../../InterpretationContext/InterpretationContext'
+import { capitalizeFirstLetter } from '../../utils'
+import { Direction } from '../../types/Direction'
 import clsx from 'clsx'
 
 import './MuteButton.scss'
 
-interface MuteButtonProps {
-  label?: string
-}
+export const MuteButton = (): JSX.Element => {
+  const interpretationContext = useInterpretationContext()
 
-export const MuteButton = (props: MuteButtonProps): JSX.Element => {
-  const [muted, setMuted] = useState(false)
+  const { changeMute } = interpretationContext
+  const { muted, language, direction } = interpretationContext.state
 
-  useEffect(() => {
-    // TODO: Get the initial value from the interpretation service
-  }, [])
+  const label = direction === Direction.MainRoomToInterpretation
+    ? capitalizeFirstLetter(language?.name ?? '')
+    : 'Main floor'
 
   return (
     <Button className={clsx('MuteButton', { muted })} data-testid='MuteButton' variant='bordered'
-      onClick={() => { setMuted(!muted) }}>
+      onClick={() => { changeMute(!muted) }}>
       <Icon source={muted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
-      <span>{muted ? 'Unmute' : 'Mute'} {props.label}</span>
+      <span>{muted ? 'Unmute' : 'Mute'} {label}</span>
     </Button>
   )
 }

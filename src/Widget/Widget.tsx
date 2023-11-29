@@ -1,72 +1,34 @@
-import React, { useState } from 'react'
+import React from 'react'
 
 import { Role } from '../types/Role'
-import { type Language } from '../types/Language'
 import { Volume } from './Volume/Volume'
 import { AdvanceLanguageSelector } from './AdvanceLanguageSelector/AdvanceLanguageSelector'
 import { BaseLanguageSelector } from './BaseLanguageSelector/BaseLanguageSelector'
 import { DraggableDialog } from './DraggableDialog/DraggableDialog'
 import { MuteButton } from './MuteButton/MuteButton'
-import { type ConnectRequest, Interpretation } from '../interpretation/interpretation'
-import { Direction } from '../types/Direction'
-import { capitalizeFirstLetter } from '../utils'
+import { useInterpretationContext } from '../InterpretationContext/InterpretationContext'
+import { config } from '../config'
 
-interface WidgetProps {
-  defaultLanguage: Language
-  role: Role
-  allowChangeDirection: boolean
-  onMinimize: () => void
-}
+export const Widget = (): JSX.Element => {
+  const { state } = useInterpretationContext()
+  const { role } = state
 
-export const Widget = (props: WidgetProps): JSX.Element => {
-  const [language, setLanguage] = useState<Language>(props.defaultLanguage)
-  const [direction, setDirection] = useState<Direction>(Direction.MainRoomToInterpretation)
-
-  const handleChangeLanguage = (language: Language): void => {
-    if (language != null) {
-      const request: ConnectRequest = {
-        language,
-        role: props.role
-      }
-      Interpretation.connect(request).catch((e) => { console.error(e) })
-    }
-    setLanguage(language)
-  }
-
-  const handleChangeDirection = (direction: Direction): void => {
-    // TODO: Mute directions
-    setDirection(direction)
-  }
+  const allowChangeDirection = config.allowChangeDirection
 
   return (
     <DraggableDialog title='Interpretation'>
       <div className='Container'>
-        {props.role === Role.Interpreter && <>
-          {props.allowChangeDirection &&
-            <AdvanceLanguageSelector
-              language={language}
-              direction={direction}
-              onChangeLanguage={handleChangeLanguage}
-              onChangeDirection={handleChangeDirection}
-            />
+        {role === Role.Interpreter && <>
+          {allowChangeDirection &&
+            <AdvanceLanguageSelector />
           }
-          {!props.allowChangeDirection &&
-            <BaseLanguageSelector
-              language={language}
-              onChangeLanguage={handleChangeLanguage}
-            />
+          {!allowChangeDirection &&
+            <BaseLanguageSelector />
           }
-          <MuteButton label={
-            direction === Direction.MainRoomToInterpretation
-              ? capitalizeFirstLetter(language?.name ?? '')
-              : 'Main floor'
-          }/>
+          <MuteButton />
         </>}
-        {props.role === Role.Listener && <>
-          <BaseLanguageSelector
-            language={language}
-            onChangeLanguage={handleChangeLanguage}
-          />
+        {role === Role.Listener && <>
+          <BaseLanguageSelector />
           <Volume />
         </>}
       </div>

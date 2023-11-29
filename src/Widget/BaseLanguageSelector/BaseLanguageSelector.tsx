@@ -1,30 +1,28 @@
 import React from 'react'
 
 import { getLanguageByCode, getLanguageOptions } from '../../language'
-import type { Language } from '../../types/Language'
 import { Select } from '@pexip/components'
+import { useInterpretationContext } from '../../InterpretationContext/InterpretationContext'
 
 import './BaseLanguageSelector.scss'
 
-interface BaseLanguageSelectorProps {
-  language: Language
-  onChangeLanguage: (language: Language) => void
-}
+export const BaseLanguageSelector = (): JSX.Element => {
+  const { changeLanguage, state } = useInterpretationContext()
+  const { language } = state
 
-export const BaseLanguageSelector = (props: BaseLanguageSelectorProps): JSX.Element => {
-  const handleChangeLanguage = (code: string): void => {
+  const handleChangeLanguage = async (code: string): Promise<void> => {
     const language = getLanguageByCode(code)
     if (language != null) {
-      props.onChangeLanguage(language)
+      await changeLanguage(language)
     }
   }
 
   return (
     <Select className='BaseLanguageSelector' isFullWidth
       label={''}
-      value={props.language.code}
+      value={language?.code ?? ''}
       options={getLanguageOptions()}
-      onValueChange={handleChangeLanguage}
+      onValueChange={(code: string) => { handleChangeLanguage(code).catch((e) => { console.error(e) }) }}
     />
   )
 }

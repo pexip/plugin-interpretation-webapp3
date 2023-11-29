@@ -1,8 +1,12 @@
-import { config } from './config'
-import { type ConnectRequest, Interpretation } from './interpretation/interpretation'
 import { getLanguageByCode, getLanguageOptions } from './language'
 import { getPlugin } from './plugin'
-import type { Language } from './types/Language'
+import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
+
+let interpretationContext: InterpretationContextType
+
+export const refreshContextForms = (context: InterpretationContextType): void => {
+  interpretationContext = context
+}
 
 export const showInterpreterForm = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -20,11 +24,10 @@ export const showInterpreterForm = async (): Promise<void> => {
       submitBtnTitle: 'Join'
     }
   })
-  const request: ConnectRequest = {
-    language: getLanguageByCode(input.language) as Language,
-    role: config.role
+  const language = getLanguageByCode(input.language)
+  if (language != null) {
+    await interpretationContext.connect(language)
   }
-  await Interpretation.connect(request)
 }
 
 export const showPinForm = async (): Promise<void> => {
@@ -45,13 +48,13 @@ export const showPinForm = async (): Promise<void> => {
     }
   })
   if (input.pin != null) {
-    const request: ConnectRequest = {
-      language: Interpretation.getLanguage() as Language,
-      role: config.role,
-      pin: input.pin
+    const { state } = interpretationContext
+    const { language } = state
+    console.log(language)
+    if (language != null) {
+      await interpretationContext.connect(language, input.pin)
     }
-    await Interpretation.connect(request)
   } else {
-    await Interpretation.leave()
+    await interpretationContext.disconnect()
   }
 }
