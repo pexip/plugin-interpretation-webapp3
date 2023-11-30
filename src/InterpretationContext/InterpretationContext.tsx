@@ -41,7 +41,7 @@ export interface InterpretationContextType {
   disconnect: () => Promise<void>
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
-  changeMute: (muted: boolean) => Promise<void>
+  changeMute: (muted: boolean) => void
   changeVolume: (volue: number) => Promise<void>
   minimize: (minimized: boolean) => void
   state: InterpretationState
@@ -186,7 +186,7 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const changeMute = async (muted: boolean): Promise<void> => {
+  const changeMute = (muted: boolean): void => {
     dispatch({
       type: InterpretationActionType.ChangedMute,
       body: {
