@@ -54,9 +54,10 @@ export const AdvanceLanguageSelector = (): JSX.Element => {
       </button>
 
       <Select className='LanguageSelect Select' isFullWidth
+        data-testid='LanguageSelect'
         aria-label='language select'
         label={reversed ? 'From' : 'To'}
-        value={language?.code ?? ''}
+        value={language != null ? language.code : ''}
         options={getLanguageOptions()}
         onValueChange={(code: string) => { handleChangeLanguage(code).catch((e) => { console.error(e) }) }}
       />
