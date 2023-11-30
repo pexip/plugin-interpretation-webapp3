@@ -19,7 +19,10 @@ export const Volume = (): JSX.Element => {
       <RangeSlider className='VolumeSlider' min={0} max={100} step={1} selectedValue={volume}
         onChange={(event) => { handleVolumeChange(event).catch((e) => { console.error(e) }) }}
       />
-      <div className={`VolumeFooter ${volume < 50 ? 'MainFloorSelected' : 'InterpreterSelected'}`}>
+      <div
+        className={`VolumeFooter ${volume < 50 ? 'MainFloorSelected' : 'InterpreterSelected'}`}
+        data-testid='VolumeFooter'
+      >
         <span className='MainFloorLabel'>Main floor</span>
         <span className='InterpreterLabel'>Interpreter</span>
       </div>
