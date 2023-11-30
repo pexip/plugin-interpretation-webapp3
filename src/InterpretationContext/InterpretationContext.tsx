@@ -16,12 +16,10 @@ import {
 import { showErrorPrompt } from '../prompts'
 import { showPinForm } from '../forms'
 import { Role } from '../types/Role'
-import { MainRoomVolume } from '../main-room/volume'
-import { MainRoomMuteButtons } from '../main-room/mute-buttons'
-import { MainRoomMediaConstraints } from '../main-room/media-constraints'
 import { getPlugin } from '../plugin'
 import { getUser } from '../user'
 import { getMainConferenceAlias } from '../conference'
+import { MainRoom } from '../main-room'
 
 const InterpretationContext = createContext<InterpretationContextType | null>(null)
 
@@ -30,8 +28,8 @@ const initialState: InterpretationState = {
   connected: false,
   language: null,
   direction: Direction.MainRoomToInterpretation,
-  muted: true,
-  volume: 1,
+  muted: false,
+  volume: config.mainFloorVolume,
   minimized: false
 }
 
@@ -149,7 +147,7 @@ export const InterpretationContextProvider = (props: {
       throw e
     }
 
-    MainRoomMuteButtons.disable(true)
+    MainRoom.disableMute(true)
   }
 
   const setConnected = (): void => {
@@ -161,8 +159,8 @@ export const InterpretationContextProvider = (props: {
   const disconnect = async (): Promise<void> => {
     await infinityClient.disconnect({ reason: 'User initiated disconnect' })
     audio.pause()
-    MainRoomVolume.set(1)
-    MainRoomMuteButtons.disable(false)
+    MainRoom.setVolume(1)
+    MainRoom.disableMute(false)
     dispatch({
       type: InterpretationActionType.Disconnected
     })
@@ -211,7 +209,7 @@ export const InterpretationContextProvider = (props: {
   const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
     let stream: MediaStream
 
-    const mainRoomConstraints = MainRoomMediaConstraints.get()
+    const mainRoomConstraints = MainRoom.getMediaConstraints()
     try {
       stream = await navigator.mediaDevices.getUserMedia({
         audio: mainRoomConstraints?.audio ?? true,
