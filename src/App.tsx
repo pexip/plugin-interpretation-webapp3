@@ -36,9 +36,12 @@ export const App = (): JSX.Element => {
     refreshContextPrompts(interpretationContext)
   }, [interpretationContext])
 
-  if (connected && !minimized) {
-    return <Widget />
-  } else {
-    return <></>
-  }
+  return (
+    <div data-testid='App'>
+      {connected && !minimized
+        ? <Widget />
+        : null
+      }
+    </div>
+  )
 }

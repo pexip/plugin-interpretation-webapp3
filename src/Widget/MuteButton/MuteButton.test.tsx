@@ -11,6 +11,15 @@ jest.mock('@pexip/components', () => ({
   }
 }))
 
+jest.mock('../../InterpretationContext/InterpretationContext', () => ({
+  useInterpretationContext: () => ({
+    changeMute: jest.fn(),
+    state: {
+      muted: jest.fn()
+    }
+  })
+}))
+
 describe('MuteButton', () => {
   it('should render', () => {
     render(<MuteButton />)
