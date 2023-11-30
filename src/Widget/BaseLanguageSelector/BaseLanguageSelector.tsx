@@ -19,6 +19,7 @@ export const BaseLanguageSelector = (): JSX.Element => {
 
   return (
     <Select className='BaseLanguageSelector' isFullWidth
+      data-testid='BaseLanguageSelector'
       label={''}
       value={language?.code ?? ''}
       options={getLanguageOptions()}
