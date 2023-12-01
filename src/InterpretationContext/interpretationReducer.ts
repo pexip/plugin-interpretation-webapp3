@@ -21,6 +21,12 @@ export const interpretationReducer = (prevState: InterpretationState, action: In
         connected: true
       }
     }
+    case InterpretationActionType.Disconnected: {
+      return {
+        ...prevState,
+        connected: false
+      }
+    }
     case InterpretationActionType.ChangedLanguage: {
       const language: Language = action.body.language
       return {
@@ -40,12 +46,6 @@ export const interpretationReducer = (prevState: InterpretationState, action: In
       return {
         ...prevState,
         muted
-      }
-    }
-    case InterpretationActionType.Disconnected: {
-      return {
-        ...prevState,
-        connected: false
       }
     }
     case InterpretationActionType.Minimize: {

@@ -30,9 +30,7 @@ const processConstraints = (constraints?: MediaStreamConstraints): void => {
 
 overrideGetUserMedia()
 
-const MainRoomMediaConstraints = {
+export const MainRoomMediaConstraints = {
   get: getConstraints
   // emitter
 }
-
-export { MainRoomMediaConstraints }

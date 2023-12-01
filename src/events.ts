@@ -1,5 +1,5 @@
 import { setMainConferenceAlias } from './conference'
-import { MainRoomVolume } from './main-room/volume'
+import { MainRoom } from './main-room'
 import { getPlugin } from './plugin'
 import { getCleanParticipant, setUser } from './user'
 import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
@@ -33,7 +33,7 @@ const handleMe = (participant: any): void => {
 const handleParticipants = (): void => {
   // Reset the volume in the video HTML element. This is needed because the web
   // app can re-create the element when a new participant joins.
-  MainRoomVolume.refresh()
+  MainRoom.refreshVolume()
 }
 
 const handleDisconnected = async (): Promise<void> => {

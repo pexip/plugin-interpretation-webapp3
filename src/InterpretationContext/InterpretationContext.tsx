@@ -23,16 +23,6 @@ import { MainRoom } from '../main-room'
 
 const InterpretationContext = createContext<InterpretationContextType | null>(null)
 
-const initialState: InterpretationState = {
-  role: config.role,
-  connected: false,
-  language: null,
-  direction: Direction.MainRoomToInterpretation,
-  muted: false,
-  volume: config.mainFloorVolume,
-  minimized: false
-}
-
 export interface InterpretationContextType {
   connect: (language: Language, pin?: string) => Promise<void>
   setConnected: () => void
@@ -48,8 +38,17 @@ export interface InterpretationContextType {
 export const InterpretationContextProvider = (props: {
   children?: JSX.Element
 }): JSX.Element => {
-  const [state, dispatch] = useReducer(interpretationReducer, initialState)
+  const initialState: InterpretationState = {
+    role: config.role,
+    connected: false,
+    language: null,
+    direction: Direction.MainRoomToInterpretation,
+    muted: false,
+    volume: config.mainFloorVolume,
+    minimized: false
+  }
 
+  const [state, dispatch] = useReducer(interpretationReducer, initialState)
   const clientSignals = createInfinityClientSignals([])
   const callSignals = createCallSignals([])
   const infinityClient = createInfinityClient(clientSignals, callSignals)
@@ -112,6 +111,7 @@ export const InterpretationContextProvider = (props: {
       roleTag = 'Interpreter'
       mediaStream = await getMediaStream()
       callType = ClientCallType.AudioSendOnly
+      MainRoom.disableMute(true)
     } else {
       roleTag = 'Listener'
       mediaStream = undefined
@@ -140,14 +140,11 @@ export const InterpretationContextProvider = (props: {
           bandwidth,
           mediaStream
         })
-        console.log('Connecting')
       }
     } catch (e) {
       stopStream(mediaStream)
       throw e
     }
-
-    MainRoom.disableMute(true)
   }
 
   const setConnected = (): void => {
@@ -208,11 +205,10 @@ export const InterpretationContextProvider = (props: {
 
   const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
     let stream: MediaStream
-
-    const mainRoomConstraints = MainRoom.getMediaConstraints()
+    const constraints = MainRoom.getMediaConstraints()
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: mainRoomConstraints?.audio ?? true,
+        audio: constraints?.audio ?? true,
         video: false
       })
       const audioTracks = stream.getAudioTracks()

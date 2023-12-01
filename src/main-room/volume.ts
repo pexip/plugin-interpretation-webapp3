@@ -19,6 +19,7 @@ const refresh = (): void => {
   }
 }
 
-const MainRoomVolume = { set, refresh }
-
-export { MainRoomVolume }
+export const MainRoomVolume = {
+  set,
+  refresh
+}

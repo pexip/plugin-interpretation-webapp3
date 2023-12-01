@@ -18,7 +18,7 @@ const selfViewObserver = new MutationObserver(observerCallback)
 
 const selfViewObserverConfig = { attributes: false, childList: true, subtree: false }
 
-export const disable = (disabled: boolean): void => {
+const disable = (disabled: boolean): void => {
   const toolbarButton = getToolbarButton()
   const foldedSelfViewButton = getFoldedSelfViewButton()
   const selfViewButton = getSelfViewButton()
@@ -47,14 +47,14 @@ export const disable = (disabled: boolean): void => {
   }
 }
 
-export const mute = (mute: boolean): void => {
+const mute = (mute: boolean): void => {
   const toolbarButton = getToolbarButton()
   if (toolbarButton != null) {
     toolbarButton.click()
   }
 }
 
-export const isMuted = (): boolean => {
+const isMuted = (): boolean => {
   const toolbarButton: HTMLButtonElement | null = parent.document.querySelector(toolbarMutedSelector)
   if (toolbarButton != null) {
     return true
@@ -99,12 +99,8 @@ const getSelfViewButton = (): HTMLButtonElement | null => {
   return null
 }
 
-const MainRoomMuteButtons = {
+export const MainRoomMuteButtons = {
   disable,
   mute,
   isMuted
-}
-
-export {
-  MainRoomMuteButtons
 }
