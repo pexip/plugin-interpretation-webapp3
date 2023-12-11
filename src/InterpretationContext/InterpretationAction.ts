@@ -5,6 +5,7 @@ enum InterpretationActionType {
   ChangedLanguage,
   ChangedDirection,
   ChangedMute,
+  ChangedVolume,
   Minimize
 }
 

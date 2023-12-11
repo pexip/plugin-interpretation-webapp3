@@ -48,6 +48,13 @@ export const interpretationReducer = (prevState: InterpretationState, action: In
         muted
       }
     }
+    case InterpretationActionType.ChangedVolume: {
+      const volume: number = action.body.volume
+      return {
+        ...prevState,
+        volume
+      }
+    }
     case InterpretationActionType.Minimize: {
       const minimized: boolean = action.body.minimized
       return {

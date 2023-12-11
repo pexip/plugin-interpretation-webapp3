@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { InterpretationContextProvider, useInterpretationContext } from './InterpretationContext'
-import { act, render, screen } from '@testing-library/react'
+import { act, fireEvent, render, screen } from '@testing-library/react'
 import type { Language } from '../types/Language'
 import { Direction } from '../types/Direction'
 import { ClientCallType } from '@pexip/infinity'
@@ -15,7 +15,8 @@ const pauseStub = jest
 
 jest.mock('../config', () => ({
   config: {
-    role: 'interpreter'
+    role: 'interpreter',
+    mainFloorVolume: 80
   }
 }))
 
@@ -30,10 +31,10 @@ const french: Language = {
   name: 'french'
 }
 
-// const spanish: Language = {
-//   code: '0034',
-//   name: 'spanish'
-// }
+const spanish: Language = {
+  code: '0034',
+  name: 'spanish'
+}
 
 const mockGetMediaConstraints = jest.fn()
 const mockSetMute = jest.fn()
@@ -92,7 +93,17 @@ jest.mock('@pexip/infinity', () => {
 }, { virtual: true })
 
 const InterpretationContextTester = (): JSX.Element => {
-  const { state } = useInterpretationContext()
+  const {
+    connect,
+    setConnected,
+    disconnect,
+    changeLanguage,
+    changeDirection,
+    changeMute,
+    changeVolume,
+    minimize,
+    state
+  } = useInterpretationContext()
   const { role, connected, language, direction, muted, volume, minimized } = state
   return (
     <div data-testid='InterpretationContextTester'>
@@ -102,7 +113,15 @@ const InterpretationContextTester = (): JSX.Element => {
       <span data-testid='direction'>{direction}</span>
       <span data-testid='muted'>{muted.toString()}</span>
       <span data-testid='volume'>{volume}</span>
-      <span data-testid='minimized'>{minimized}</span>
+      <span data-testid='minimized'>{minimized.toString()}</span>
+      <button data-testid='connect' onClick={() => { connect(french).catch((e) => { console.error(e) }) }} />
+      <button data-testid='setConnected' onClick={() => { setConnected() }} />
+      <button data-testid='disconnect' onClick={() => { disconnect().catch((e) => { console.error(e) }) }} />
+      <button data-testid='changeLanguage' onClick={() => { changeLanguage(spanish).catch((e) => { console.error(e) }) }} />
+      <button data-testid='changeDirection' onClick={() => { changeDirection(Direction.InterpretationToMainRoom).catch((e) => { console.error(e) }) }} />
+      <button data-testid='changeMute' onClick={() => { changeMute(true) }} />
+      <button data-testid='changeVolume' onClick={() => { changeVolume(70) }} />
+      <button data-testid='minimize' onClick={() => { minimize(true) }} />
     </div>
   )
 }
@@ -125,7 +144,7 @@ describe('InterpretationContext', () => {
   it('should create a context', () => {
     render(
       <InterpretationContextProvider>
-          <InterpretationContextTester />
+        <InterpretationContextTester />
       </InterpretationContextProvider>
     )
     const tester = screen.getByTestId('InterpretationContextTester')
@@ -133,25 +152,18 @@ describe('InterpretationContext', () => {
   })
 
   describe('connect', () => {
-    beforeEach(async () => {
-      const MyTestComponent = (): JSX.Element => {
-        const { connect } = useInterpretationContext()
-        useEffect(() => { connect(french).catch((e) => { console.error(e) }) }, [])
-        return <InterpretationContextTester />
-      }
-
-      await act(async () => {
+    describe('interpreter', () => {
+      beforeEach(async () => {
+        config.role = Role.Interpreter
         render(
           <InterpretationContextProvider>
-            <MyTestComponent />
+            <InterpretationContextTester />
           </InterpretationContextProvider>
         )
-      })
-    })
-
-    describe('interpreter', () => {
-      beforeAll(() => {
-        config.role = Role.Interpreter
+        await act(async () => {
+          const button = screen.getByTestId('connect')
+          fireEvent.click(button)
+        })
       })
 
       it('should disable the main room mute', async () => {
@@ -190,8 +202,17 @@ describe('InterpretationContext', () => {
     })
 
     describe('listener', () => {
-      beforeAll(() => {
+      beforeEach(async () => {
         config.role = Role.Listener
+        render(
+          <InterpretationContextProvider>
+            <InterpretationContextTester />
+          </InterpretationContextProvider>
+        )
+        await act(async () => {
+          const button = screen.getByTestId('connect')
+          fireEvent.click(button)
+        })
       })
 
       it('shouldn\'t disable the main room mute', async () => {
@@ -227,8 +248,17 @@ describe('InterpretationContext', () => {
     })
 
     describe('unprotected by pin', () => {
-      beforeAll(() => {
+      beforeAll(async () => {
         protectedByPin = true
+        render(
+          <InterpretationContextProvider>
+            <InterpretationContextTester />
+          </InterpretationContextProvider>
+        )
+        await act(async () => {
+          const button = screen.getByTestId('connect')
+          fireEvent.click(button)
+        })
       })
 
       it('should set the correct states', async () => {
@@ -249,8 +279,17 @@ describe('InterpretationContext', () => {
     })
 
     describe('protected by pin', () => {
-      beforeAll(() => {
+      beforeAll(async () => {
         protectedByPin = false
+        render(
+          <InterpretationContextProvider>
+            <InterpretationContextTester />
+          </InterpretationContextProvider>
+        )
+        await act(async () => {
+          const button = screen.getByTestId('connect')
+          fireEvent.click(button)
+        })
       })
 
       it('should set the correct states', async () => {
@@ -272,17 +311,19 @@ describe('InterpretationContext', () => {
   })
 
   describe('setConnected', () => {
-    it('should change the state to connected', () => {
-      const MyTestComponent = (): JSX.Element => {
-        const { setConnected } = useInterpretationContext()
-        useEffect(() => { setConnected() }, [])
-        return <InterpretationContextTester />
-      }
+    beforeEach(async () => {
       render(
         <InterpretationContextProvider>
-          <MyTestComponent />
+          <InterpretationContextTester />
         </InterpretationContextProvider>
       )
+      await act(async () => {
+        const button = screen.getByTestId('setConnected')
+        fireEvent.click(button)
+      })
+    })
+
+    it('should change the state to connected', () => {
       const connected = screen.getByTestId('connected')
       expect(connected.innerHTML).toBe('true')
     })
@@ -290,21 +331,16 @@ describe('InterpretationContext', () => {
 
   describe('disconnect', () => {
     beforeEach(async () => {
-      const MyTestComponent = (): JSX.Element => {
-        const { setConnected, disconnect } = useInterpretationContext()
-        useEffect(() => {
-          setConnected()
-          disconnect().catch((e) => { console.error(e) })
-        }, [])
-        return <InterpretationContextTester />
-      }
-
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
       await act(async () => {
-        render(
-          <InterpretationContextProvider>
-            <MyTestComponent />
-          </InterpretationContextProvider>
-        )
+        const buttonSetConnected = screen.getByTestId('setConnected')
+        fireEvent.click(buttonSetConnected)
+        const buttonDisconnect = screen.getByTestId('disconnect')
+        fireEvent.click(buttonDisconnect)
       })
     })
 
@@ -334,22 +370,122 @@ describe('InterpretationContext', () => {
   })
 
   describe('changeLanguage', () => {
+    beforeEach(async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+    })
 
+    it('should have the default language to null', () => {
+      const language = screen.getByTestId('language')
+      expect(language.innerHTML).toBe('null')
+    })
+
+    it('should have the default language to "spanish"', async () => {
+      const button = screen.getByTestId('changeLanguage')
+      await act(async () => {
+        fireEvent.click(button)
+      })
+      const language = screen.getByTestId('language')
+      expect(language.innerHTML).toBe(JSON.stringify(spanish))
+    })
   })
 
   describe('changeDirection', () => {
+    beforeEach(async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+    })
 
+    it('should have the default direction to "MainRoomToInterpretation"', () => {
+      const language = screen.getByTestId('direction')
+      expect(language.innerHTML).toBe(Direction.MainRoomToInterpretation)
+    })
+
+    it('should have change the direction to "InterpretationToMainRoom"', async () => {
+      const button = screen.getByTestId('changeDirection')
+      await act(async () => {
+        fireEvent.click(button)
+      })
+      const language = screen.getByTestId('direction')
+      expect(language.innerHTML).toBe(Direction.InterpretationToMainRoom)
+    })
   })
 
   describe('changeMute', () => {
+    beforeEach(async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+    })
 
+    it('should be unmuted by default', () => {
+      const muted = screen.getByTestId('muted')
+      expect(muted.innerHTML).toBe('false')
+    })
+
+    it('should be muted when clicked', async () => {
+      const button = screen.getByTestId('changeMute')
+      await act(async () => {
+        fireEvent.click(button)
+      })
+      const muted = screen.getByTestId('muted')
+      expect(muted.innerHTML).toBe('true')
+    })
   })
 
   describe('changeVolume', () => {
+    beforeEach(async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+    })
 
+    it('should get the default value from the config file', () => {
+      const volume = screen.getByTestId('volume')
+      expect(volume.innerHTML).toBe('80')
+    })
+
+    it('should change the volume when clicked', async () => {
+      const button = screen.getByTestId('changeVolume')
+      await act(async () => {
+        fireEvent.click(button)
+      })
+      const volume = screen.getByTestId('volume')
+      expect(volume.innerHTML).toBe('70')
+    })
   })
 
   describe('minimize', () => {
+    beforeEach(async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+    })
 
+    it('should be not be minimized by default', () => {
+      const minimized = screen.getByTestId('minimized')
+      expect(minimized.innerHTML).toBe('false')
+    })
+
+    it('should be minimized when clicked', async () => {
+      const button = screen.getByTestId('minimize')
+      await act(async () => {
+        fireEvent.click(button)
+      })
+      const minimized = screen.getByTestId('minimized')
+      expect(minimized.innerHTML).toBe('true')
+    })
   })
 })

@@ -30,7 +30,7 @@ export interface InterpretationContextType {
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
   changeMute: (muted: boolean) => void
-  changeVolume: (volue: number) => Promise<void>
+  changeVolume: (volume: number) => void
   minimize: (minimized: boolean) => void
   state: InterpretationState
 }
@@ -190,8 +190,13 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const changeVolume = async (): Promise<void> => {
-    await Promise.resolve()
+  const changeVolume = (volume: number): void => {
+    dispatch({
+      type: InterpretationActionType.ChangedVolume,
+      body: {
+        volume
+      }
+    })
   }
 
   const minimize = (minimized: boolean): void => {
