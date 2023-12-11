@@ -36,27 +36,27 @@ const spanish: Language = {
   name: 'spanish'
 }
 
-const mockGetMediaConstraints = jest.fn()
-const mockSetMute = jest.fn()
-const mockIsMuted = jest.fn()
-const mockDisableMute = jest.fn()
-const mockSetVolume = jest.fn()
-const mockRefreshVolume = jest.fn()
+const mockMainRoomGetMediaConstraints = jest.fn()
+const mockMainRoomSetMute = jest.fn()
+const mockMainRoomIsMuted = jest.fn()
+const mockMainRoomDisableMute = jest.fn()
+const mockMainRoomSetVolume = jest.fn()
+const mockMainRoomRefreshVolume = jest.fn()
 jest.mock('../main-room', () => ({
   MainRoom: {
-    getMediaConstraints: () => mockGetMediaConstraints(),
-    setMute: (muted: boolean) => mockSetMute(muted),
-    isMuted: () => mockIsMuted(),
-    disableMute: (disabled: boolean) => mockDisableMute(disabled),
-    setVolume: (volume: number) => mockSetVolume(volume),
-    refreshVolume: () => mockRefreshVolume()
+    getMediaConstraints: () => mockMainRoomGetMediaConstraints(),
+    setMute: (muted: boolean) => mockMainRoomSetMute(muted),
+    isMuted: () => mockMainRoomIsMuted(),
+    disableMute: (disabled: boolean) => mockMainRoomDisableMute(disabled),
+    setVolume: (volume: number) => mockMainRoomSetVolume(volume),
+    refreshVolume: () => mockMainRoomRefreshVolume()
   }
 }))
 
-const mockCall = jest.fn()
-const mockMute = jest.fn()
-const mockSetStream = jest.fn()
-const mockDisconnect = jest.fn()
+const mockInfinityCall = jest.fn()
+const mockInfinityMute = jest.fn()
+const mockInfinitySetStream = jest.fn()
+const mockInfinityDisconnect = jest.fn()
 
 let protectedByPin = true
 let onAuthenticatedWithConferenceCallback: () => void
@@ -80,14 +80,14 @@ jest.mock('@pexip/infinity', () => {
     })),
     createInfinityClient: jest.fn(() => ({
       call: (params: any) => {
-        mockCall(params)
+        mockInfinityCall(params)
         if (!protectedByPin) {
           onAuthenticatedWithConferenceCallback()
         }
       },
-      mute: (params: any) => { mockMute(params) },
-      setStream: (params: any) => { mockSetStream(params) },
-      disconnect: (params: any) => { mockDisconnect(params) }
+      mute: (params: any) => { mockInfinityMute(params) },
+      setStream: (params: any) => { mockInfinitySetStream(params) },
+      disconnect: (params: any) => { mockInfinityDisconnect(params) }
     }))
   }
 }, { virtual: true })
@@ -118,8 +118,14 @@ const InterpretationContextTester = (): JSX.Element => {
       <button data-testid='setConnected' onClick={() => { setConnected() }} />
       <button data-testid='disconnect' onClick={() => { disconnect().catch((e) => { console.error(e) }) }} />
       <button data-testid='changeLanguage' onClick={() => { changeLanguage(spanish).catch((e) => { console.error(e) }) }} />
-      <button data-testid='changeDirection' onClick={() => { changeDirection(Direction.InterpretationToMainRoom).catch((e) => { console.error(e) }) }} />
-      <button data-testid='changeMute' onClick={() => { changeMute(true) }} />
+      <button data-testid='changeDirection' onClick={() => {
+        changeDirection(
+          direction === Direction.InterpretationToMainRoom
+            ? Direction.MainRoomToInterpretation
+            : Direction.InterpretationToMainRoom
+        ).catch((e) => { console.error(e) })
+      }} />
+      <button data-testid='changeMute' onClick={() => { changeMute(!muted) }} />
       <button data-testid='changeVolume' onClick={() => { changeVolume(70) }} />
       <button data-testid='minimize' onClick={() => { minimize(true) }} />
     </div>
@@ -128,16 +134,16 @@ const InterpretationContextTester = (): JSX.Element => {
 
 describe('InterpretationContext', () => {
   beforeEach(() => {
-    mockGetMediaConstraints.mockClear()
-    mockSetMute.mockClear()
-    mockIsMuted.mockClear()
-    mockDisableMute.mockClear()
-    mockSetVolume.mockClear()
-    mockRefreshVolume.mockClear()
-    mockCall.mockClear()
-    mockMute.mockClear()
-    mockSetStream.mockClear()
-    mockDisconnect.mockClear()
+    mockMainRoomGetMediaConstraints.mockClear()
+    mockMainRoomSetMute.mockClear()
+    mockMainRoomIsMuted.mockClear()
+    mockMainRoomDisableMute.mockClear()
+    mockMainRoomSetVolume.mockClear()
+    mockMainRoomRefreshVolume.mockClear()
+    mockInfinityCall.mockClear()
+    mockInfinityMute.mockClear()
+    mockInfinitySetStream.mockClear()
+    mockInfinityDisconnect.mockClear()
     pauseStub.mockClear()
   })
 
@@ -167,13 +173,13 @@ describe('InterpretationContext', () => {
       })
 
       it('should disable the main room mute', async () => {
-        expect(mockDisableMute).toHaveBeenCalledTimes(1)
-        expect(mockDisableMute).toHaveBeenCalledWith(true)
+        expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomDisableMute).toHaveBeenCalledWith(true)
       })
 
       it('should use callType=AudioSendOnly', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             callType: ClientCallType.AudioSendOnly
           })
@@ -181,8 +187,8 @@ describe('InterpretationContext', () => {
       })
 
       it('should add " - Interpreter" at the end of the displayName', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             displayName: 'user-display-name - Interpreter'
           })
@@ -190,8 +196,8 @@ describe('InterpretationContext', () => {
       })
 
       it('should pass a mediaStream', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             mediaStream: expect.objectContaining({
               active: true
@@ -216,12 +222,12 @@ describe('InterpretationContext', () => {
       })
 
       it('shouldn\'t disable the main room mute', async () => {
-        expect(mockDisableMute).not.toHaveBeenCalled()
+        expect(mockMainRoomDisableMute).not.toHaveBeenCalled()
       })
 
       it('should use callType=AudioRecvOnly', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             callType: ClientCallType.AudioRecvOnly
           })
@@ -229,8 +235,8 @@ describe('InterpretationContext', () => {
       })
 
       it('should add " - Listener" at the end of the displayName', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             displayName: 'user-display-name - Listener'
           })
@@ -238,8 +244,8 @@ describe('InterpretationContext', () => {
       })
 
       it('should\'t pass a mediaStream', async () => {
-        expect(mockCall).toHaveBeenCalledTimes(1)
-        expect(mockCall).toHaveBeenCalledWith(
+        expect(mockInfinityCall).toHaveBeenCalledTimes(1)
+        expect(mockInfinityCall).toHaveBeenCalledWith(
           expect.objectContaining({
             mediaStream: undefined
           })
@@ -354,18 +360,18 @@ describe('InterpretationContext', () => {
     })
 
     it('should call infinityClient.disconnect', () => {
-      expect(mockDisconnect).toHaveBeenCalledTimes(1)
-      expect(mockDisconnect).toHaveBeenCalledWith({ reason: 'User initiated disconnect' })
+      expect(mockInfinityDisconnect).toHaveBeenCalledTimes(1)
+      expect(mockInfinityDisconnect).toHaveBeenCalledWith({ reason: 'User initiated disconnect' })
     })
 
     it('should set the volume in the main room to 1', () => {
-      expect(mockSetVolume).toHaveBeenCalledTimes(1)
-      expect(mockSetVolume).toHaveBeenCalledWith(1)
+      expect(mockMainRoomSetVolume).toHaveBeenCalledTimes(1)
+      expect(mockMainRoomSetVolume).toHaveBeenCalledWith(1)
     })
 
     it('should enable the mute buttons', () => {
-      expect(mockDisableMute).toHaveBeenCalledTimes(1)
-      expect(mockDisableMute).toHaveBeenCalledWith(false)
+      expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
+      expect(mockMainRoomDisableMute).toHaveBeenCalledWith(false)
     })
   })
 
@@ -407,13 +413,71 @@ describe('InterpretationContext', () => {
       expect(language.innerHTML).toBe(Direction.MainRoomToInterpretation)
     })
 
-    it('should have change the direction to "InterpretationToMainRoom"', async () => {
-      const button = screen.getByTestId('changeDirection')
-      await act(async () => {
-        fireEvent.click(button)
+    describe('InterpretationToMainRoom', () => {
+      it('should change the direction to "InterpretationToMainRoom"', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        const language = screen.getByTestId('direction')
+        expect(language.innerHTML).toBe(Direction.InterpretationToMainRoom)
       })
-      const language = screen.getByTestId('direction')
-      expect(language.innerHTML).toBe(Direction.InterpretationToMainRoom)
+
+      it('should unmute the main room', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomSetMute).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomSetMute).toHaveBeenCalledWith(false)
+      })
+
+      it('should mute the interpretation room', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockInfinityMute).toHaveBeenCalledTimes(1)
+        expect(mockInfinityMute).toHaveBeenCalledWith({ mute: true })
+      })
+    })
+
+    describe('MainRoomToInterpretation', () => {
+      it('should change the direction to "MainRoomToInterpretation"', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        const language = screen.getByTestId('direction')
+        expect(language.innerHTML).toBe(Direction.MainRoomToInterpretation)
+      })
+
+      it('should mute the main room', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomSetMute).toHaveBeenCalledTimes(2)
+        expect(mockMainRoomSetMute).toHaveBeenCalledWith(true)
+      })
+
+      it('should unmute the interpretation room', async () => {
+        const button = screen.getByTestId('changeDirection')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockInfinityMute).toHaveBeenCalledTimes(2)
+        expect(mockInfinityMute).toHaveBeenCalledWith({ mute: false })
+      })
     })
   })
 

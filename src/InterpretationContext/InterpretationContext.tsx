@@ -173,6 +173,13 @@ export const InterpretationContextProvider = (props: {
   }
 
   const changeDirection = async (direction: Direction): Promise<void> => {
+    if (direction === Direction.MainRoomToInterpretation) {
+      MainRoom.setMute(true)
+      await infinityClient.mute({ mute: state.muted })
+    } else {
+      MainRoom.setMute(state.muted)
+      await infinityClient.mute({ mute: true })
+    }
     dispatch({
       type: InterpretationActionType.ChangedDirection,
       body: {
