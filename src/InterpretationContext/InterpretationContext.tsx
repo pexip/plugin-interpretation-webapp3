@@ -25,11 +25,11 @@ const InterpretationContext = createContext<InterpretationContextType | null>(nu
 
 export interface InterpretationContextType {
   connect: (language: Language, pin?: string) => Promise<void>
-  setConnected: () => void
+  setConnected: () => Promise<void>
   disconnect: () => Promise<void>
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
-  changeMute: (muted: boolean) => void
+  changeMute: (muted: boolean) => Promise<void>
   changeVolume: (volume: number) => void
   minimize: (minimized: boolean) => void
   state: InterpretationState
@@ -111,7 +111,6 @@ export const InterpretationContextProvider = (props: {
       roleTag = 'Interpreter'
       mediaStream = await getMediaStream()
       callType = ClientCallType.AudioSendOnly
-      MainRoom.disableMute(true)
     } else {
       roleTag = 'Listener'
       mediaStream = undefined
@@ -147,7 +146,15 @@ export const InterpretationContextProvider = (props: {
     }
   }
 
-  const setConnected = (): void => {
+  const setConnected = async (): Promise<void> => {
+    if (state.role === Role.Interpreter) {
+      if (MainRoom.isMuted()) {
+        await changeMute(true)
+      } else {
+        MainRoom.setMute(true)
+      }
+      MainRoom.disableMute(true)
+    }
     dispatch({
       type: InterpretationActionType.Connected
     })
@@ -188,7 +195,12 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const changeMute = (muted: boolean): void => {
+  const changeMute = async (muted: boolean): Promise<void> => {
+    if (state.direction === Direction.MainRoomToInterpretation) {
+      await infinityClient.mute({ mute: muted })
+    } else {
+      MainRoom.setMute(muted)
+    }
     dispatch({
       type: InterpretationActionType.ChangedMute,
       body: {

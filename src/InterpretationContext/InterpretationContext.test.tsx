@@ -172,11 +172,6 @@ describe('InterpretationContext', () => {
         })
       })
 
-      it('should disable the main room mute', async () => {
-        expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
-        expect(mockMainRoomDisableMute).toHaveBeenCalledWith(true)
-      })
-
       it('should use callType=AudioSendOnly', async () => {
         expect(mockInfinityCall).toHaveBeenCalledTimes(1)
         expect(mockInfinityCall).toHaveBeenCalledWith(
@@ -219,10 +214,6 @@ describe('InterpretationContext', () => {
           const button = screen.getByTestId('connect')
           fireEvent.click(button)
         })
-      })
-
-      it('shouldn\'t disable the main room mute', async () => {
-        expect(mockMainRoomDisableMute).not.toHaveBeenCalled()
       })
 
       it('should use callType=AudioRecvOnly', async () => {
@@ -317,21 +308,97 @@ describe('InterpretationContext', () => {
   })
 
   describe('setConnected', () => {
-    beforeEach(async () => {
-      render(
-        <InterpretationContextProvider>
-          <InterpretationContextTester />
-        </InterpretationContextProvider>
-      )
-      await act(async () => {
-        const button = screen.getByTestId('setConnected')
-        fireEvent.click(button)
+    describe('interpreter', () => {
+      beforeEach(async () => {
+        console.log('rendering')
+        config.role = Role.Interpreter
+        render(
+          <InterpretationContextProvider>
+            <InterpretationContextTester />
+          </InterpretationContextProvider>
+        )
+      })
+
+      it('should change the state to connected', async () => {
+        await act(async () => {
+          const button = screen.getByTestId('setConnected')
+          fireEvent.click(button)
+        })
+        const connected = screen.getByTestId('connected')
+        expect(connected.innerHTML).toBe('true')
+      })
+
+      it('should disable the main room mute', async () => {
+        await act(async () => {
+          const button = screen.getByTestId('setConnected')
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomDisableMute).toHaveBeenCalledWith(true)
+      })
+
+      describe('main room unmuted', () => {
+        mockMainRoomIsMuted.mockReturnValue(false)
+        beforeEach(async () => {
+          await act(async () => {
+            const button = screen.getByTestId('setConnected')
+            fireEvent.click(button)
+          })
+        })
+        it('should mute the main room if not muted before', async () => {
+          expect(mockMainRoomSetMute).toHaveBeenCalledTimes(1)
+          expect(mockMainRoomSetMute).toHaveBeenCalledWith(true)
+        })
+
+        it('shouldn\'t mute the interpretation room', () => {
+          expect(mockInfinityMute).not.toHaveBeenCalled()
+        })
+      })
+
+      describe('main room muted', () => {
+        beforeEach(async () => {
+          mockMainRoomIsMuted.mockReturnValue(true)
+          await act(async () => {
+            const button = screen.getByTestId('setConnected')
+            fireEvent.click(button)
+          })
+        })
+
+        it('shouldn\'t mute the main room', async () => {
+          console.log('test1')
+          expect(mockMainRoomSetMute).not.toHaveBeenCalled()
+        })
+
+        it('should mute the interpretation room', () => {
+          console.log('test2')
+          expect(mockInfinityMute).toHaveBeenCalledTimes(1)
+          expect(mockInfinityMute).toHaveBeenCalledWith({ mute: true })
+        })
       })
     })
 
-    it('should change the state to connected', () => {
-      const connected = screen.getByTestId('connected')
-      expect(connected.innerHTML).toBe('true')
+    describe('listener', () => {
+      beforeEach(async () => {
+        config.role = Role.Listener
+        render(
+          <InterpretationContextProvider>
+            <InterpretationContextTester />
+          </InterpretationContextProvider>
+        )
+        await act(async () => {
+          const button = screen.getByTestId('setConnected')
+          fireEvent.click(button)
+        })
+      })
+
+      it('should change the state to connected', () => {
+        const connected = screen.getByTestId('connected')
+        expect(connected.innerHTML).toBe('true')
+      })
+
+      it('shouldn\'t disable the main room mute', async () => {
+        expect(mockMainRoomDisableMute).not.toHaveBeenCalled()
+      })
     })
   })
 
