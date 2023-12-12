@@ -20,12 +20,12 @@ import { getPlugin } from '../plugin'
 import { getUser } from '../user'
 import { getMainConferenceAlias } from '../conference'
 import { MainRoom } from '../main-room'
+import { setButtonActive } from '../button'
 
 const InterpretationContext = createContext<InterpretationContextType | null>(null)
 
 export interface InterpretationContextType {
   connect: (language: Language, pin?: string) => Promise<void>
-  setConnected: () => Promise<void>
   disconnect: () => Promise<void>
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
@@ -73,9 +73,7 @@ export const InterpretationContextProvider = (props: {
     })
 
     signals.onAuthenticatedWithConference.add(async () => {
-      dispatch({
-        type: InterpretationActionType.Connected
-      })
+      await handleConnected()
     })
 
     signals.onError.add(async ({ error, errorCode }): Promise<void> => {
@@ -144,20 +142,6 @@ export const InterpretationContextProvider = (props: {
       stopStream(mediaStream)
       throw e
     }
-  }
-
-  const setConnected = async (): Promise<void> => {
-    if (state.role === Role.Interpreter) {
-      if (MainRoom.isMuted()) {
-        await changeMute(true)
-      } else {
-        MainRoom.setMute(true)
-      }
-      MainRoom.disableMute(true)
-    }
-    dispatch({
-      type: InterpretationActionType.Connected
-    })
   }
 
   const disconnect = async (): Promise<void> => {
@@ -250,10 +234,25 @@ export const InterpretationContextProvider = (props: {
     stream?.getTracks().forEach((track) => { track.stop() })
   }
 
+  const handleConnected = async (): Promise<void> => {
+    if (state.role === Role.Interpreter) {
+      if (MainRoom.isMuted()) {
+        await changeMute(true)
+      } else {
+        MainRoom.setMute(true)
+      }
+      MainRoom.disableMute(true)
+    }
+
+    await setButtonActive(true)
+    dispatch({
+      type: InterpretationActionType.Connected
+    })
+  }
+
   const interpretationContextValue = useMemo(
     () => ({
       connect,
-      setConnected,
       disconnect,
       changeLanguage,
       changeDirection,
