@@ -447,6 +447,11 @@ describe('InterpretationContext', () => {
       expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
       expect(mockMainRoomDisableMute).toHaveBeenCalledWith(false)
     })
+
+    it('should change the toolbar button to active', async () => {
+      expect(mockSetButtonActive).toHaveBeenCalledTimes(2)
+      expect(mockSetButtonActive).toHaveBeenLastCalledWith(false)
+    })
   })
 
   describe('changeLanguage', () => {

@@ -50,7 +50,14 @@ const disable = (disabled: boolean): void => {
 const mute = (mute: boolean): void => {
   const toolbarButton = getToolbarButton()
   if (toolbarButton != null) {
+    const disabled = toolbarButton.disabled
+    if (disabled) {
+      disable(false)
+    }
     toolbarButton.click()
+    if (disabled) {
+      disable(true)
+    }
   }
 }
 

@@ -25,7 +25,7 @@ export const refreshContextButton = (context: InterpretationContextType): void =
 export const initializeButton = async (): Promise<void> => {
   const plugin = getPlugin()
   button = await plugin.ui.addButton(buttonPayload)
-  button.onClick.add(handleOnClick)
+  button.onClick.add(handleClick)
 }
 
 export const setButtonActive = async (active: boolean): Promise<void> => {
@@ -35,17 +35,13 @@ export const setButtonActive = async (active: boolean): Promise<void> => {
   }))
 }
 
-const handleOnClick = async (): Promise<void> => {
-  if (isSameDomain()) {
-    const { minimize, state } = interpretationContext
-    const { language } = state
+const handleClick = async (): Promise<void> => {
+  const { minimize, state } = interpretationContext
+  const { connected } = state
 
-    if (language != null) {
-      minimize(false)
-    } else {
-      await showInterpreterForm()
-    }
+  if (connected) {
+    minimize(false)
   } else {
-    await getPlugin().ui.showToast({ message: 'Interpretation plugin should be served from the Web App 3 domain.' })
+    await showInterpreterForm()
   }
 }
