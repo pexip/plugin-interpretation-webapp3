@@ -51,12 +51,17 @@ const mute = (mute: boolean): void => {
   const toolbarButton = getToolbarButton()
   if (toolbarButton != null) {
     const disabled = toolbarButton.disabled
-    if (disabled) {
-      disable(false)
-    }
-    toolbarButton.click()
-    if (disabled) {
-      disable(true)
+    const muted = toolbarButton.getAttribute('data-testid') === 'button-meeting-audioinput-muted'
+    console.log(toolbarButton.getAttribute('data-testid'))
+    console.log(muted)
+    if (muted !== mute) {
+      if (disabled) {
+        disable(false)
+      }
+      toolbarButton.click()
+      if (disabled) {
+        disable(true)
+      }
     }
   }
 }

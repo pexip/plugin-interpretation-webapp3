@@ -149,6 +149,7 @@ export const InterpretationContextProvider = (props: {
     audio.pause()
     MainRoom.setVolume(1)
     MainRoom.disableMute(false)
+    MainRoom.setMute(state.muted)
     await setButtonActive(false)
     dispatch({
       type: InterpretationActionType.Disconnected
@@ -186,6 +187,7 @@ export const InterpretationContextProvider = (props: {
     } else {
       MainRoom.setMute(muted)
     }
+
     dispatch({
       type: InterpretationActionType.ChangedMute,
       body: {

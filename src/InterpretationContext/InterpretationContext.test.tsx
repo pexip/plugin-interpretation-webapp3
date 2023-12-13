@@ -313,7 +313,6 @@ describe('InterpretationContext', () => {
     describe('handleConnected', () => {
       describe('interpreter', () => {
         beforeEach(async () => {
-          console.log('rendering')
           config.role = Role.Interpreter
           render(
             <InterpretationContextProvider>
@@ -409,48 +408,74 @@ describe('InterpretationContext', () => {
   })
 
   describe('disconnect', () => {
-    beforeEach(async () => {
+    const renderDisconnectionTest = async (shouldMuteInterpretation = false): Promise<void> => {
       render(
         <InterpretationContextProvider>
           <InterpretationContextTester />
         </InterpretationContextProvider>
       )
+
       await act(async () => {
-        await act(async () => {
-          onAuthenticatedWithConferenceCallback()
-        })
+        onAuthenticatedWithConferenceCallback()
+      })
+      await act(async () => {
+        if (shouldMuteInterpretation) {
+          const buttonMute = screen.getByTestId('changeMute')
+          fireEvent.click(buttonMute)
+        }
+      })
+      await act(async () => {
         const buttonDisconnect = screen.getByTestId('disconnect')
         fireEvent.click(buttonDisconnect)
       })
-    })
+    }
 
     it('should change the state to disconnected', async () => {
+      await renderDisconnectionTest()
       const connected = screen.getByTestId('connected')
       expect(connected.innerHTML).toBe('false')
     })
 
     it('should pause the audio', async () => {
+      await renderDisconnectionTest()
       expect(pauseStub).toHaveBeenCalledTimes(1)
     })
 
-    it('should call infinityClient.disconnect', () => {
+    it('should call infinityClient.disconnect', async () => {
+      await renderDisconnectionTest()
       expect(mockInfinityDisconnect).toHaveBeenCalledTimes(1)
       expect(mockInfinityDisconnect).toHaveBeenCalledWith({ reason: 'User initiated disconnect' })
     })
 
-    it('should set the volume in the main room to 1', () => {
+    it('should set the volume in the main room to 1', async () => {
+      await renderDisconnectionTest()
       expect(mockMainRoomSetVolume).toHaveBeenCalledTimes(1)
       expect(mockMainRoomSetVolume).toHaveBeenCalledWith(1)
     })
 
-    it('should enable the mute buttons', () => {
+    it('should enable the mute buttons', async () => {
+      await renderDisconnectionTest()
       expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
       expect(mockMainRoomDisableMute).toHaveBeenCalledWith(false)
     })
 
     it('should change the toolbar button to active', async () => {
+      await renderDisconnectionTest()
       expect(mockSetButtonActive).toHaveBeenCalledTimes(2)
       expect(mockSetButtonActive).toHaveBeenLastCalledWith(false)
+    })
+
+    it('should come back to the main room unmuted if the interpretation was unmuted', async () => {
+      await renderDisconnectionTest()
+      expect(mockMainRoomSetMute).toHaveBeenCalledTimes(1)
+      expect(mockMainRoomSetMute).toHaveBeenCalledWith(false)
+    })
+
+    it('should come back to the main room muted if the interpretation was muted', async () => {
+      const shouldMuteInterpretation = true
+      await renderDisconnectionTest(shouldMuteInterpretation)
+      expect(mockMainRoomSetMute).toHaveBeenCalledTimes(1)
+      expect(mockMainRoomSetMute).toHaveBeenCalledWith(true)
     })
   })
 
