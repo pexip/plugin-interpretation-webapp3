@@ -9,26 +9,15 @@
   }
 
   &:hover { 
-    background-color: #3c5974 !important;
-
-    svg, span {
-      color: white;
-    }
+    background-color: transparent !important;
   }
 
   &.muted {
-    box-shadow: 0 0 0 1px inset #F24949 !important;
-
-    svg, span {
-      color: #F24949;
-    }
-
-    &:hover { 
-      background-color: #F24949 !important;
+    box-shadow: none !important;
+    background-color: #F24949 !important;
   
-      svg, span {
-        color: white;
-      }
+    svg, span {
+      color: white;
     }
   }
 }
