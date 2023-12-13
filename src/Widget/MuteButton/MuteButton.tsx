@@ -20,7 +20,7 @@ export const MuteButton = (): JSX.Element => {
 
   return (
     <Button className={clsx('MuteButton', { muted })} data-testid='MuteButton' variant='bordered'
-      onClick={() => { changeMute(!muted) }}>
+      onClick={() => { changeMute(!muted).catch((e) => { console.error(e) }) }}>
       <Icon source={muted ? IconTypes.IconMicrophoneOff : IconTypes.IconMicrophoneOn} />
       <span>{muted ? 'Unmute' : 'Mute'} {label}</span>
     </Button>

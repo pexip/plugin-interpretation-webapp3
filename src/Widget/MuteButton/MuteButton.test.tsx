@@ -16,7 +16,7 @@ var mockMuted = false
 const mockChangeMute = jest.fn()
 jest.mock('../../InterpretationContext/InterpretationContext', () => ({
   useInterpretationContext: () => ({
-    changeMute: (muted: boolean) => mockChangeMute(muted),
+    changeMute: async (muted: boolean) => mockChangeMute(muted),
     state: {
       muted: mockMuted
     }

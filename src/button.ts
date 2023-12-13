@@ -1,18 +1,14 @@
 import { getPlugin } from './plugin'
-import { isSameDomain } from './utils'
 import { showInterpreterForm } from './forms'
 import type { Button, ToolbarButtonPayload } from '@pexip/plugin-api'
 import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
 
 let button: Button<'toolbar'>
 
-const tooltipActive = 'Join interpretation'
-const tooltipInactive = 'Leave interpretation'
-
 const buttonPayload: ToolbarButtonPayload = {
   position: 'toolbar',
   icon: 'IconSupport',
-  tooltip: tooltipActive,
+  tooltip: 'Interpretation',
   roles: ['chair', 'guest']
 }
 
@@ -30,8 +26,7 @@ export const initializeButton = async (): Promise<void> => {
 
 export const setButtonActive = async (active: boolean): Promise<void> => {
   await button.update(Object.assign(buttonPayload, {
-    isActive: active,
-    tooltip: active ? tooltipActive : tooltipInactive
+    isActive: active
   }))
 }
 
