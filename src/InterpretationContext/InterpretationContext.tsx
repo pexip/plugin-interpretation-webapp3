@@ -26,6 +26,7 @@ import { setButtonActive } from '../button'
 const InterpretationContext = createContext<InterpretationContextType | null>(null)
 
 export interface InterpretationContextType {
+  setPin: (pin: string) => void
   connect: (language: Language, pin?: string) => Promise<void>
   disconnect: () => Promise<void>
   changeLanguage: (language: Language) => Promise<void>
@@ -40,6 +41,7 @@ const clientSignals = createInfinityClientSignals([])
 const callSignals = createCallSignals([])
 let infinityClient: InfinityClient
 const audio: HTMLAudioElement = new Audio()
+let pin: string | null = null
 
 export const InterpretationContextProvider = (props: {
   children?: JSX.Element
@@ -67,8 +69,8 @@ export const InterpretationContextProvider = (props: {
           await showPinForm()
         } else {
           if (state.language != null && role != null) {
-            const pin = ''
-            await connect(state.language, pin)
+            setPin('')
+            await connect(state.language)
           }
         }
       }
@@ -92,7 +94,11 @@ export const InterpretationContextProvider = (props: {
 
   let mediaStream: MediaStream | undefined
 
-  const connect = async (language: Language, pin?: string): Promise<void> => {
+  const setPin = (newPin: string): void => {
+    pin = newPin
+  }
+
+  const connect = async (language: Language): Promise<void> => {
     infinityClient = createInfinityClient(clientSignals, callSignals)
     initializeInfinityClientSignals(clientSignals)
     initializeInfinityCallSignals(callSignals)
@@ -258,6 +264,7 @@ export const InterpretationContextProvider = (props: {
 
   const interpretationContextValue = useMemo(
     () => ({
+      setPin,
       connect,
       disconnect,
       changeLanguage,

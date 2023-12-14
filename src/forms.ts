@@ -50,9 +50,10 @@ export const showPinForm = async (): Promise<void> => {
   if (input.pin != null) {
     const { state } = interpretationContext
     const { language } = state
-    console.log(language)
+
     if (language != null) {
-      await interpretationContext.connect(language, input.pin)
+      interpretationContext.setPin(input.pin)
+      await interpretationContext.connect(language)
     }
   } else {
     await interpretationContext.disconnect()

@@ -2,6 +2,7 @@ enum InterpretationActionType {
   Connecting,
   Connected,
   Disconnected,
+  ChangedPin,
   ChangedLanguage,
   ChangedDirection,
   ChangedMute,
