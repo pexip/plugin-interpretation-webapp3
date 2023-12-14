@@ -63,7 +63,7 @@ const mockInfinityMute = jest.fn()
 const mockInfinitySetStream = jest.fn()
 const mockInfinityDisconnect = jest.fn()
 
-let protectedByPin = true
+let protectedByPin = false
 let onAuthenticatedWithConferenceCallback: () => void
 jest.mock('@pexip/infinity', () => {
   return {
@@ -248,7 +248,7 @@ describe('InterpretationContext', () => {
       })
     })
 
-    describe('unprotected by pin', () => {
+    describe('protected by pin', () => {
       beforeAll(async () => {
         protectedByPin = true
         render(
@@ -279,7 +279,7 @@ describe('InterpretationContext', () => {
       })
     })
 
-    describe('protected by pin', () => {
+    describe('unprotected by pin', () => {
       beforeAll(async () => {
         protectedByPin = false
         render(
@@ -313,12 +313,17 @@ describe('InterpretationContext', () => {
     describe('handleConnected', () => {
       describe('interpreter', () => {
         beforeEach(async () => {
+          protectedByPin = true
           config.role = Role.Interpreter
           render(
             <InterpretationContextProvider>
               <InterpretationContextTester />
             </InterpretationContextProvider>
           )
+          await act(async () => {
+            const button = screen.getByTestId('connect')
+            fireEvent.click(button)
+          })
         })
 
         it('should change the state to connected', async () => {
@@ -385,11 +390,16 @@ describe('InterpretationContext', () => {
       describe('listener', () => {
         beforeEach(async () => {
           config.role = Role.Listener
+          protectedByPin = true
           render(
             <InterpretationContextProvider>
               <InterpretationContextTester />
             </InterpretationContextProvider>
           )
+          await act(async () => {
+            const button = screen.getByTestId('connect')
+            fireEvent.click(button)
+          })
           await act(async () => {
             onAuthenticatedWithConferenceCallback()
           })

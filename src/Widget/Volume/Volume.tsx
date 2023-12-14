@@ -10,7 +10,7 @@ export const Volume = (): JSX.Element => {
   const { volume } = state
 
   const handleVolumeChange = async (event: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
-    await changeVolume(parseInt(event.target.value))
+    changeVolume(parseInt(event.target.value))
   }
 
   return (

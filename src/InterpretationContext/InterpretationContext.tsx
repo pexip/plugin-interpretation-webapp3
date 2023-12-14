@@ -11,7 +11,8 @@ import {
   createInfinityClient,
   createInfinityClientSignals,
   type CallSignals,
-  ClientCallType
+  ClientCallType,
+  type InfinityClient
 } from '@pexip/infinity'
 import { showErrorPrompt } from '../prompts'
 import { showPinForm } from '../forms'
@@ -35,6 +36,11 @@ export interface InterpretationContextType {
   state: InterpretationState
 }
 
+const clientSignals = createInfinityClientSignals([])
+const callSignals = createCallSignals([])
+let infinityClient: InfinityClient
+const audio: HTMLAudioElement = new Audio()
+
 export const InterpretationContextProvider = (props: {
   children?: JSX.Element
 }): JSX.Element => {
@@ -49,10 +55,6 @@ export const InterpretationContextProvider = (props: {
   }
 
   const [state, dispatch] = useReducer(interpretationReducer, initialState)
-  const clientSignals = createInfinityClientSignals([])
-  const callSignals = createCallSignals([])
-  const infinityClient = createInfinityClient(clientSignals, callSignals)
-  const audio: HTMLAudioElement = new Audio()
 
   const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
     signals.onPinRequired.add(async ({ hasHostPin, hasGuestPin }) => {
@@ -66,7 +68,7 @@ export const InterpretationContextProvider = (props: {
         } else {
           if (state.language != null && role != null) {
             const pin = ''
-            await interpretationContextValue.connect(state.language, pin)
+            await connect(state.language, pin)
           }
         }
       }
@@ -88,12 +90,13 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  initializeInfinityClientSignals(clientSignals)
-  initializeInfinityCallSignals(callSignals)
-
   let mediaStream: MediaStream | undefined
 
   const connect = async (language: Language, pin?: string): Promise<void> => {
+    infinityClient = createInfinityClient(clientSignals, callSignals)
+    initializeInfinityClientSignals(clientSignals)
+    initializeInfinityCallSignals(callSignals)
+
     const username = getUser().displayName ?? getUser().uuid
     let roleTag: string
     let callType: ClientCallType
