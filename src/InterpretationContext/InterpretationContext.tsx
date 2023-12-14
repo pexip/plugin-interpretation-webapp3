@@ -39,6 +39,8 @@ export interface InterpretationContextType {
 
 const clientSignals = createInfinityClientSignals([])
 const callSignals = createCallSignals([])
+let signalsInitialized = false
+
 let infinityClient: InfinityClient
 const audio: HTMLAudioElement = new Audio()
 let pin: string | null = null
@@ -100,19 +102,25 @@ export const InterpretationContextProvider = (props: {
 
   const connect = async (language: Language): Promise<void> => {
     infinityClient = createInfinityClient(clientSignals, callSignals)
-    initializeInfinityClientSignals(clientSignals)
-    initializeInfinityCallSignals(callSignals)
+
+    if (!signalsInitialized) {
+      initializeInfinityClientSignals(clientSignals)
+      initializeInfinityCallSignals(callSignals)
+      signalsInitialized = true
+    }
 
     const username = getUser().displayName ?? getUser().uuid
     let roleTag: string
     let callType: ClientCallType
 
-    dispatch({
-      type: InterpretationActionType.Connecting,
-      body: {
-        language
-      }
-    })
+    if (!state.connected) {
+      dispatch({
+        type: InterpretationActionType.Connecting,
+        body: {
+          language
+        }
+      })
+    }
 
     if (state.role === Role.Interpreter) {
       roleTag = 'Interpreter'
@@ -166,6 +174,8 @@ export const InterpretationContextProvider = (props: {
   }
 
   const changeLanguage = async (language: Language): Promise<void> => {
+    await infinityClient.disconnect({ reason: 'User initiated disconnect' })
+    await connect(language)
     dispatch({
       type: InterpretationActionType.ChangedLanguage,
       body: {
