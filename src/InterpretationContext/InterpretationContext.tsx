@@ -234,7 +234,10 @@ export const InterpretationContextProvider = (props: {
     const signals = createInfinityClientSignals([])
     signals.onPinRequired.add(handlePin)
     signals.onAuthenticatedWithConference.add(handleConnected)
-    signals.onError.add(showErrorPrompt)
+    signals.onError.add(async (options) => {
+      pin = null
+      await showErrorPrompt(options)
+    })
     return signals
   }
 
