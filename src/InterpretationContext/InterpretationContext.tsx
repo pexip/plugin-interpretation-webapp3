@@ -145,6 +145,7 @@ export const InterpretationContextProvider = (props: {
 
   const changeLanguage = async (language: Language): Promise<void> => {
     await infinityClient.disconnect({ reason: 'User initiated disconnect' })
+    MainRoom.setMute(state.muted)
     await connect(language)
     dispatch({
       type: InterpretationActionType.ChangedLanguage,
