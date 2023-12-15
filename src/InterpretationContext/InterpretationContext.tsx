@@ -6,13 +6,13 @@ import { interpretationReducer } from './interpretationReducer'
 import { config } from '../config'
 import { InterpretationActionType } from './InterpretationAction'
 import {
-  type InfinitySignals,
   createCallSignals,
   createInfinityClient,
   createInfinityClientSignals,
-  type CallSignals,
   ClientCallType,
-  type InfinityClient
+  type InfinityClient,
+  type InfinitySignals,
+  type CallSignals
 } from '@pexip/infinity'
 import { showErrorPrompt } from '../prompts'
 import { showPinForm } from '../forms'
@@ -37,10 +37,6 @@ export interface InterpretationContextType {
   state: InterpretationState
 }
 
-const clientSignals = createInfinityClientSignals([])
-const callSignals = createCallSignals([])
-let signalsInitialized = false
-
 let infinityClient: InfinityClient
 const audio: HTMLAudioElement = new Audio()
 let pin: string | null = null
@@ -60,40 +56,6 @@ export const InterpretationContextProvider = (props: {
 
   const [state, dispatch] = useReducer(interpretationReducer, initialState)
 
-  const initializeInfinityClientSignals = (signals: InfinitySignals): void => {
-    signals.onPinRequired.add(async ({ hasHostPin, hasGuestPin }) => {
-      const role = config.role
-      if (role === Role.Interpreter && hasHostPin) {
-        await showPinForm()
-      }
-      if (role === Role.Listener) {
-        if (hasGuestPin) {
-          await showPinForm()
-        } else {
-          if (state.language != null && role != null) {
-            setPin('')
-            await connect(state.language)
-          }
-        }
-      }
-    })
-
-    signals.onAuthenticatedWithConference.add(async () => {
-      await handleConnected()
-    })
-
-    signals.onError.add(async ({ error, errorCode }): Promise<void> => {
-      await showErrorPrompt(error)
-    })
-  }
-
-  const initializeInfinityCallSignals = (signals: CallSignals): void => {
-    signals.onRemoteStream.add(async (stream) => {
-      audio.autoplay = true
-      audio.srcObject = stream
-    })
-  }
-
   let mediaStream: MediaStream | undefined
 
   const setPin = (newPin: string): void => {
@@ -101,13 +63,9 @@ export const InterpretationContextProvider = (props: {
   }
 
   const connect = async (language: Language): Promise<void> => {
+    const clientSignals = initializeInfinityClientSignals()
+    const callSignals = initializeInfinityCallSignals()
     infinityClient = createInfinityClient(clientSignals, callSignals)
-
-    if (!signalsInitialized) {
-      initializeInfinityClientSignals(clientSignals)
-      initializeInfinityCallSignals(callSignals)
-      signalsInitialized = true
-    }
 
     const username = getUser().displayName ?? getUser().uuid
     let roleTag: string
@@ -216,6 +174,10 @@ export const InterpretationContextProvider = (props: {
   }
 
   const changeVolume = (volume: number): void => {
+    const mainRoomVolume = Math.min(2 * (1 - volume / 100), 1)
+    const interpretationVolume = Math.min(volume * 2 / 100, 1)
+    MainRoom.setVolume(mainRoomVolume)
+    audio.volume = interpretationVolume
     dispatch({
       type: InterpretationActionType.ChangedVolume,
       body: {
@@ -256,6 +218,37 @@ export const InterpretationContextProvider = (props: {
     stream?.getTracks().forEach((track) => { track.stop() })
   }
 
+  const initializeInfinityClientSignals = (): InfinitySignals => {
+    const signals = createInfinityClientSignals([])
+    signals.onPinRequired.add(handlePin)
+    signals.onAuthenticatedWithConference.add(handleConnected)
+    signals.onError.add(showErrorPrompt)
+    return signals
+  }
+
+  const initializeInfinityCallSignals = (): CallSignals => {
+    const signals = createCallSignals([])
+    signals.onRemoteStream.add(handlePlayStream)
+    return signals
+  }
+
+  const handlePin = async ({ hasHostPin, hasGuestPin }: { hasHostPin: boolean, hasGuestPin: boolean }): Promise<void> => {
+    const role = config.role
+    if (role === Role.Interpreter && hasHostPin) {
+      await showPinForm()
+    }
+    if (role === Role.Listener) {
+      if (hasGuestPin) {
+        await showPinForm()
+      } else {
+        if (state.language != null && role != null) {
+          setPin('')
+          await connect(state.language)
+        }
+      }
+    }
+  }
+
   const handleConnected = async (): Promise<void> => {
     if (state.role === Role.Interpreter) {
       if (MainRoom.isMuted()) {
@@ -270,6 +263,11 @@ export const InterpretationContextProvider = (props: {
     dispatch({
       type: InterpretationActionType.Connected
     })
+  }
+
+  const handlePlayStream = (stream: MediaStream): void => {
+    audio.autoplay = true
+    audio.srcObject = stream
   }
 
   const interpretationContextValue = useMemo(

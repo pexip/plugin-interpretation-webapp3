@@ -13,6 +13,10 @@ const pauseStub = jest
   .spyOn(window.HTMLMediaElement.prototype, 'pause')
   .mockImplementation(() => {})
 
+const volumeStub = jest
+  .spyOn(window.HTMLMediaElement.prototype, 'volume', 'set')
+  .mockImplementation(() => {})
+
 jest.mock('../config', () => ({
   config: {
     role: 'interpreter',
@@ -97,6 +101,7 @@ jest.mock('@pexip/infinity', () => {
   }
 }, { virtual: true })
 
+let newVolume: number = 0
 const InterpretationContextTester = (): JSX.Element => {
   const {
     connect,
@@ -129,7 +134,7 @@ const InterpretationContextTester = (): JSX.Element => {
         ).catch((e) => { console.error(e) })
       }} />
       <button data-testid='changeMute' onClick={() => { changeMute(!muted).catch((e) => { console.error(e) }) }} />
-      <button data-testid='changeVolume' onClick={() => { changeVolume(70) }} />
+      <button data-testid='changeVolume' onClick={() => { changeVolume(newVolume) }} />
       <button data-testid='minimize' onClick={() => { minimize(true) }} />
     </div>
   )
@@ -149,6 +154,7 @@ describe('InterpretationContext', () => {
     mockInfinityDisconnect.mockClear()
     mockSetButtonActive.mockClear()
     pauseStub.mockClear()
+    volumeStub.mockClear()
   })
 
   it('should create a context', () => {
@@ -419,6 +425,7 @@ describe('InterpretationContext', () => {
 
   describe('disconnect', () => {
     const renderDisconnectionTest = async (shouldMuteInterpretation = false): Promise<void> => {
+      config.role = Role.Interpreter
       render(
         <InterpretationContextProvider>
           <InterpretationContextTester />
@@ -634,12 +641,77 @@ describe('InterpretationContext', () => {
     })
 
     it('should change the volume when clicked', async () => {
+      newVolume = 70
       const button = screen.getByTestId('changeVolume')
       await act(async () => {
         fireEvent.click(button)
       })
       const volume = screen.getByTestId('volume')
-      expect(volume.innerHTML).toBe('70')
+      expect(volume.innerHTML).toBe(newVolume.toString())
+    })
+
+    describe('mainRoom volume', () => {
+      it('should be 1 when volume==0%', async () => {
+        newVolume = 0
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomSetVolume).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomSetVolume).toHaveBeenCalledWith(1)
+      })
+
+      it('should be 1 when volume==50%', async () => {
+        newVolume = 50
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomSetVolume).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomSetVolume).toHaveBeenCalledWith(1)
+      })
+
+      it('should be 0 when volume==100%', async () => {
+        newVolume = 100
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(mockMainRoomSetVolume).toHaveBeenCalledTimes(1)
+        expect(mockMainRoomSetVolume).toHaveBeenCalledWith(0)
+      })
+    })
+
+    describe('interpretation volume', () => {
+      it('should be 0 when volume==0%', async () => {
+        newVolume = 0
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(volumeStub).toHaveBeenCalledTimes(1)
+        expect(volumeStub).toHaveBeenCalledWith(0)
+      })
+
+      it('should be 1 when volume==50%', async () => {
+        newVolume = 50
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(volumeStub).toHaveBeenCalledTimes(1)
+        expect(volumeStub).toHaveBeenCalledWith(1)
+      })
+
+      it('should be 1 when volume==100%', async () => {
+        newVolume = 50
+        const button = screen.getByTestId('changeVolume')
+        await act(async () => {
+          fireEvent.click(button)
+        })
+        expect(volumeStub).toHaveBeenCalledTimes(1)
+        expect(volumeStub).toHaveBeenCalledWith(1)
+      })
     })
   })
 
