@@ -9,6 +9,7 @@ const getConstraints = (): MediaStreamConstraints | null => {
 // const emitter = new EventEmitter()
 
 const overrideGetUserMedia = (): void => {
+  // eslint-disable-next-line @typescript-eslint/unbound-method
   const callback = parent.navigator.mediaDevices.getUserMedia
   parent.navigator.mediaDevices.getUserMedia = async (constraints?: MediaStreamConstraints): Promise<MediaStream> => {
     // Ignore the changes while the settings panel is open.

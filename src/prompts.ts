@@ -1,6 +1,6 @@
 import { getPlugin } from './plugin'
 import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
-import type { ExtendedInfinityErrorCode, ExtendedInfinityErrorMessage } from '@pexip/infinity'
+import type { ExtendedInfinityErrorCode } from '@pexip/infinity'
 
 let interpretationContext: InterpretationContextType
 
@@ -30,7 +30,7 @@ export const showDisconnectPrompt = async (): Promise<void> => {
 }
 
 export const showErrorPrompt = async ({ error, errorCode }: {
-  error: ExtendedInfinityErrorMessage
+  error: string
   errorCode: ExtendedInfinityErrorCode
 }): Promise<void> => {
   const plugin = getPlugin()

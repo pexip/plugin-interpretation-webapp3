@@ -20,7 +20,6 @@ export default defineConfig({
   },
   publicDir: config.publicDir,
   server: {
-    https: true,
     open: config.brandingPath + '/',
     port: config.port,
     proxy: {
