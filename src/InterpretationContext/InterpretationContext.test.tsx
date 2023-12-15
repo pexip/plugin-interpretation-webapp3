@@ -106,6 +106,7 @@ const InterpretationContextTester = (): JSX.Element => {
   const {
     connect,
     disconnect,
+    changeMediaDevice,
     changeLanguage,
     changeDirection,
     changeMute,
@@ -125,6 +126,7 @@ const InterpretationContextTester = (): JSX.Element => {
       <span data-testid='minimized'>{minimized.toString()}</span>
       <button data-testid='connect' onClick={() => { connect(french).catch((e) => { console.error(e) }) }} />
       <button data-testid='disconnect' onClick={() => { disconnect().catch((e) => { console.error(e) }) }} />
+      <button data-testid='changeMediaDevice' onClick={() => { changeMediaDevice({}).catch((e) => { console.error(e) }) }} />
       <button data-testid='changeLanguage' onClick={() => { changeLanguage(spanish).catch((e) => { console.error(e) }) }} />
       <button data-testid='changeDirection' onClick={() => {
         changeDirection(
@@ -493,6 +495,41 @@ describe('InterpretationContext', () => {
       await renderDisconnectionTest(shouldMuteInterpretation)
       expect(mockMainRoomSetMute).toHaveBeenCalledTimes(1)
       expect(mockMainRoomSetMute).toHaveBeenCalledWith(true)
+    })
+  })
+
+  describe('changeMediaDevice', () => {
+    it('should call setStream if connected', async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+      await act(async () => {
+        const button = screen.getByTestId('connect')
+        fireEvent.click(button)
+      })
+      await act(async () => {
+        onAuthenticatedWithConferenceCallback()
+      })
+      await act(async () => {
+        const button = screen.getByTestId('changeMediaDevice')
+        fireEvent.click(button)
+      })
+      expect(mockInfinitySetStream).toHaveBeenCalledTimes(1)
+    })
+
+    it('shouldn\'t do anything if not connected', async () => {
+      render(
+        <InterpretationContextProvider>
+          <InterpretationContextTester />
+        </InterpretationContextProvider>
+      )
+      await act(async () => {
+        const button = screen.getByTestId('changeMediaDevice')
+        fireEvent.click(button)
+      })
+      expect(mockInfinitySetStream).not.toHaveBeenCalled()
     })
   })
 

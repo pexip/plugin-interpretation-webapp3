@@ -29,7 +29,7 @@ export interface InterpretationContextType {
   setPin: (pin: string) => void
   connect: (language: Language, pin?: string) => Promise<void>
   disconnect: () => Promise<void>
-  changeMediaDevice: (constraints: MediaStreamConstraints) => void
+  changeMediaDevice: (constraints: MediaTrackConstraints) => Promise<void>
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
   changeMute: (muted: boolean) => Promise<void>
@@ -41,6 +41,7 @@ export interface InterpretationContextType {
 let infinityClient: InfinityClient
 const audio: HTMLAudioElement = new Audio()
 let pin: string | null = null
+let mediaStream: MediaStream | undefined
 
 export const InterpretationContextProvider = (props: {
   children?: JSX.Element
@@ -56,8 +57,6 @@ export const InterpretationContextProvider = (props: {
   }
 
   const [state, dispatch] = useReducer(interpretationReducer, initialState)
-
-  let mediaStream: MediaStream | undefined
 
   const setPin = (newPin: string): void => {
     pin = newPin
@@ -83,7 +82,8 @@ export const InterpretationContextProvider = (props: {
 
     if (state.role === Role.Interpreter) {
       roleTag = 'Interpreter'
-      mediaStream = await getMediaStream()
+      const constraints = MainRoom.getMediaConstraints()
+      mediaStream = await getMediaStream(constraints)
       callType = ClientCallType.AudioSendOnly
     } else {
       roleTag = 'Listener'
@@ -132,9 +132,12 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const changeMediaDevice = (constraints: MediaStreamConstraints): void => {
-    console.log('changeMediaDevice')
-    console.log(constraints)
+  const changeMediaDevice = async (constraints: MediaTrackConstraints): Promise<void> => {
+    if (state.connected) {
+      stopStream(mediaStream)
+      mediaStream = await getMediaStream(constraints)
+      infinityClient.setStream(mediaStream)
+    }
   }
 
   const changeLanguage = async (language: Language): Promise<void> => {
@@ -201,12 +204,11 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const getMediaStream = async (deviceId?: string): Promise<MediaStream> => {
+  const getMediaStream = async (constraints?: MediaTrackConstraints): Promise<MediaStream> => {
     let stream: MediaStream
-    const constraints = MainRoom.getMediaConstraints()
     try {
       stream = await navigator.mediaDevices.getUserMedia({
-        audio: constraints?.audio ?? true,
+        audio: constraints ?? true,
         video: false
       })
       const audioTracks = stream.getAudioTracks()
