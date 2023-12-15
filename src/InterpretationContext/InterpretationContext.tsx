@@ -39,7 +39,10 @@ export interface InterpretationContextType {
 }
 
 let infinityClient: InfinityClient
+
 const audio: HTMLAudioElement = new Audio()
+audio.autoplay = true
+
 let pin: string | null = null
 let mediaStream: MediaStream | undefined
 
@@ -236,7 +239,7 @@ export const InterpretationContextProvider = (props: {
 
   const initializeInfinityCallSignals = (): CallSignals => {
     const signals = createCallSignals([])
-    signals.onRemoteStream.add(handlePlayStream)
+    signals.onRemoteStream.add((stream) => { audio.srcObject = stream })
     return signals
   }
 
@@ -271,11 +274,6 @@ export const InterpretationContextProvider = (props: {
     dispatch({
       type: InterpretationActionType.Connected
     })
-  }
-
-  const handlePlayStream = (stream: MediaStream): void => {
-    audio.autoplay = true
-    audio.srcObject = stream
   }
 
   const interpretationContextValue = useMemo(
