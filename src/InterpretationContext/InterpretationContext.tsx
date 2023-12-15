@@ -29,6 +29,7 @@ export interface InterpretationContextType {
   setPin: (pin: string) => void
   connect: (language: Language, pin?: string) => Promise<void>
   disconnect: () => Promise<void>
+  changeMediaDevice: (constraints: MediaStreamConstraints) => void
   changeLanguage: (language: Language) => Promise<void>
   changeDirection: (direction: Direction) => Promise<void>
   changeMute: (muted: boolean) => Promise<void>
@@ -129,6 +130,11 @@ export const InterpretationContextProvider = (props: {
     dispatch({
       type: InterpretationActionType.Disconnected
     })
+  }
+
+  const changeMediaDevice = (constraints: MediaStreamConstraints): void => {
+    console.log('changeMediaDevice')
+    console.log(constraints)
   }
 
   const changeLanguage = async (language: Language): Promise<void> => {
@@ -275,6 +281,7 @@ export const InterpretationContextProvider = (props: {
       setPin,
       connect,
       disconnect,
+      changeMediaDevice,
       changeLanguage,
       changeDirection,
       changeMute,

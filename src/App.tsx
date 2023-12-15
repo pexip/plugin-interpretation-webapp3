@@ -2,13 +2,12 @@ import React, { useEffect } from 'react'
 
 import { registerPlugin } from '@pexip/plugin-api'
 import { setPlugin } from './plugin'
-import { initializeEvents, refreshContextEvents } from './events'
-import { initializeButton, refreshContextButton } from './button'
+import { initializeEvents } from './events'
+import { initializeButton } from './button'
 import { initializeIFrame } from './iframe'
 import { Widget } from './Widget/Widget'
 import { useInterpretationContext } from './InterpretationContext/InterpretationContext'
-import { refreshContextForms } from './forms'
-import { refreshContextPrompts } from './prompts'
+import { setInterpretationContext } from './interpretationContext'
 
 export const App = (): JSX.Element => {
   const interpretationContext = useInterpretationContext()
@@ -30,10 +29,7 @@ export const App = (): JSX.Element => {
   }, [])
 
   useEffect(() => {
-    refreshContextEvents(interpretationContext)
-    refreshContextButton(interpretationContext)
-    refreshContextForms(interpretationContext)
-    refreshContextPrompts(interpretationContext)
+    setInterpretationContext(interpretationContext)
   }, [interpretationContext])
 
   return (

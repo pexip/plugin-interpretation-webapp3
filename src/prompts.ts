@@ -1,12 +1,6 @@
+import { getInterpretationContext } from './interpretationContext'
 import { getPlugin } from './plugin'
-import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
 import type { ExtendedInfinityErrorCode } from '@pexip/infinity'
-
-let interpretationContext: InterpretationContextType
-
-export const refreshContextPrompts = (context: InterpretationContextType): void => {
-  interpretationContext = context
-}
 
 export const showDisconnectPrompt = async (): Promise<void> => {
   const plugin = getPlugin()
@@ -24,7 +18,7 @@ export const showDisconnectPrompt = async (): Promise<void> => {
   prompt.onInput.add(async (result) => {
     await prompt.remove()
     if (result === primaryAction) {
-      await interpretationContext.disconnect()
+      await getInterpretationContext().disconnect()
     }
   })
 }

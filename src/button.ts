@@ -1,7 +1,7 @@
 import { getPlugin } from './plugin'
 import { showInterpreterForm } from './forms'
 import type { Button, ToolbarButtonPayload } from '@pexip/plugin-api'
-import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
+import { getInterpretationContext } from './interpretationContext'
 
 let button: Button<'toolbar'>
 
@@ -10,12 +10,6 @@ const buttonPayload: ToolbarButtonPayload = {
   icon: 'IconSupport',
   tooltip: 'Interpretation',
   roles: ['chair', 'guest']
-}
-
-let interpretationContext: InterpretationContextType
-
-export const refreshContextButton = (context: InterpretationContextType): void => {
-  interpretationContext = context
 }
 
 export const initializeButton = async (): Promise<void> => {
@@ -31,7 +25,7 @@ export const setButtonActive = async (active: boolean): Promise<void> => {
 }
 
 const handleClick = async (): Promise<void> => {
-  const { minimize, state } = interpretationContext
+  const { minimize, state } = getInterpretationContext()
   const { connected } = state
 
   if (connected) {

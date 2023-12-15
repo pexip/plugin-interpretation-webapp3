@@ -1,17 +1,12 @@
+import { type InfinityParticipant } from '@pexip/plugin-api'
 import { setMainConferenceAlias } from './conference'
+import { getInterpretationContext } from './interpretationContext'
 import { MainRoom } from './main-room'
 import { getPlugin } from './plugin'
-import { getCleanParticipant, setUser } from './user'
-import type { InterpretationContextType } from './InterpretationContext/InterpretationContext'
+import { setUser } from './user'
 
 interface AuthenticatedWithConferenceEvent {
   conferenceAlias: string
-}
-
-let interpretationContext: InterpretationContextType
-
-export const refreshContextEvents = (context: InterpretationContextType): void => {
-  interpretationContext = context
 }
 
 export const initializeEvents = (): void => {
@@ -26,8 +21,8 @@ const handleAuthenticatedWithConference = (event: AuthenticatedWithConferenceEve
   setMainConferenceAlias(event.conferenceAlias)
 }
 
-const handleMe = (participant: any): void => {
-  setUser(getCleanParticipant(participant))
+const handleMe = (event: { id: string, participant: InfinityParticipant }): void => {
+  setUser(event.participant)
 }
 
 const handleParticipants = (): void => {
@@ -37,5 +32,5 @@ const handleParticipants = (): void => {
 }
 
 const handleDisconnected = async (): Promise<void> => {
-  await interpretationContext.disconnect()
+  await getInterpretationContext().disconnect()
 }
