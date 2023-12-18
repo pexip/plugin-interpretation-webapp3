@@ -13,7 +13,8 @@ export const Widget = (): JSX.Element => {
   const { state } = useInterpretationContext()
   const { role } = state
 
-  const allowChangeDirection = config.allowChangeDirection
+  const allowChangeDirection = config.interpreter?.allowChangeDirection
+  const showListenerMuteButton = config.listener?.speakToInterpretationRoom
 
   return (
     <DraggableDialog title='Interpretation'>
@@ -30,6 +31,9 @@ export const Widget = (): JSX.Element => {
         {role === Role.Listener && <>
           <BaseLanguageSelector />
           <Volume />
+          {showListenerMuteButton &&
+            <MuteButton />
+          }
         </>}
       </div>
     </DraggableDialog>

@@ -1,8 +1,13 @@
 {
   "role": "interpreter",
   "reusePin": true,
-  "allowChangeDirection": true,
-  "mainFloorVolume": 0.2,
+  "interpreter": {
+    "allowChangeDirection": true
+  },
+  "listener": {
+    "mainFloorVolume": 0.2,
+    "speakToInterpretationRoom": true
+  },
   "languages": [
     {
       "code": "0033",

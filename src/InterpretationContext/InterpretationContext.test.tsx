@@ -20,7 +20,9 @@ const volumeStub = jest
 jest.mock('../config', () => ({
   config: {
     role: 'interpreter',
-    mainFloorVolume: 80
+    listener: {
+      mainFloorVolume: 80
+    }
   }
 }))
 
@@ -396,7 +398,7 @@ describe('InterpretationContext', () => {
       })
 
       describe('listener', () => {
-        beforeEach(async () => {
+        const renderConnectedListenerTest = async (): Promise<void> => {
           config.role = Role.Listener
           protectedByPin = true
           render(
@@ -411,15 +413,29 @@ describe('InterpretationContext', () => {
           await act(async () => {
             onAuthenticatedWithConferenceCallback()
           })
-        })
+        }
 
-        it('should change the state to connected', () => {
+        it('should change the state to connected', async () => {
+          await renderConnectedListenerTest()
           const connected = screen.getByTestId('connected')
           expect(connected.innerHTML).toBe('true')
         })
 
-        it('shouldn\'t disable the main room mute', async () => {
-          expect(mockMainRoomDisableMute).not.toHaveBeenCalled()
+        describe('speakToInterpretationRoom === false', () => {
+          it('shouldn\'t disable the main room mute', async () => {
+            config.listener.speakToInterpretationRoom = false
+            await renderConnectedListenerTest()
+            expect(mockMainRoomDisableMute).not.toHaveBeenCalled()
+          })
+        })
+
+        describe('speakToInterpretationRoom === true', () => {
+          it('should disable the main room mute', async () => {
+            config.listener.speakToInterpretationRoom = true
+            await renderConnectedListenerTest()
+            expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
+            expect(mockMainRoomDisableMute).toHaveBeenCalledWith(true)
+          })
         })
       })
     })
@@ -474,7 +490,7 @@ describe('InterpretationContext', () => {
 
     it('should enable the mute buttons', async () => {
       await renderDisconnectionTest()
-      expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(1)
+      expect(mockMainRoomDisableMute).toHaveBeenCalledTimes(2)
       expect(mockMainRoomDisableMute).toHaveBeenCalledWith(false)
     })
 
@@ -641,6 +657,7 @@ describe('InterpretationContext', () => {
 
   describe('changeMute', () => {
     beforeEach(async () => {
+      config.role = Role.Listener
       render(
         <InterpretationContextProvider>
           <InterpretationContextTester />

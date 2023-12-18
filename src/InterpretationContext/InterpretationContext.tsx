@@ -49,13 +49,17 @@ let mediaStream: MediaStream | undefined
 export const InterpretationContextProvider = (props: {
   children?: JSX.Element
 }): JSX.Element => {
+  const volume: number =
+    config.role === Role.Interpreter
+      ? 100
+      : config.listener?.mainFloorVolume ?? 0
   const initialState: InterpretationState = {
     role: config.role,
     connected: false,
     language: null,
     direction: Direction.MainRoomToInterpretation,
     muted: false,
-    volume: config.mainFloorVolume,
+    volume,
     minimized: false
   }
 
@@ -87,11 +91,23 @@ export const InterpretationContextProvider = (props: {
       roleTag = 'Interpreter'
       const constraints = MainRoom.getMediaConstraints()
       mediaStream = await getMediaStream(constraints)
-      callType = ClientCallType.AudioSendOnly
+      const shouldSendReceive = config.interpreter?.allowChangeDirection
+      if (shouldSendReceive) {
+        callType = ClientCallType.Audio
+      } else {
+        callType = ClientCallType.AudioSendOnly
+      }
     } else {
       roleTag = 'Listener'
       mediaStream = undefined
-      callType = ClientCallType.AudioRecvOnly
+      const shouldSendReceive = config.listener?.speakToInterpretationRoom
+      if (shouldSendReceive) {
+        const constraints = MainRoom.getMediaConstraints()
+        mediaStream = await getMediaStream(constraints)
+        callType = ClientCallType.Audio
+      } else {
+        callType = ClientCallType.AudioRecvOnly
+      }
     }
 
     const displayName = `${username} - ${roleTag}`
@@ -136,7 +152,9 @@ export const InterpretationContextProvider = (props: {
   }
 
   const changeMediaDevice = async (constraints: MediaTrackConstraints): Promise<void> => {
-    if (state.connected) {
+    if (state.connected &&
+      (state.role === Role.Interpreter || config.listener?.speakToInterpretationRoom)
+    ) {
       stopStream(mediaStream)
       mediaStream = await getMediaStream(constraints)
       infinityClient.setStream(mediaStream)
@@ -265,7 +283,10 @@ export const InterpretationContextProvider = (props: {
   }
 
   const handleConnected = async (): Promise<void> => {
-    if (state.role === Role.Interpreter) {
+    const showListenerMuteButton = config.listener?.speakToInterpretationRoom
+    if (state.role === Role.Interpreter ||
+      (state.role === Role.Listener && showListenerMuteButton)
+    ) {
       if (MainRoom.isMuted()) {
         await changeMute(true)
       } else {
