@@ -158,15 +158,16 @@ Here is an example of configuration:
 
 | Parameter | type | Description |
 |-----------|------|-------------|
-| role | 'interpreter' \| 'listener' |Indicates the role of the user that joins to the interpretation. We have two different roles: `interpreter` and `listener`.
-| allowChangeDirection | boolean | If `true` the interpreter will be able to change the direction. He will be able to translate from the main floor to the interpretation room and the other way around. |
-| defaultMainFloorVolume | number | Float value between 0 and 1 that indicates the percentage of the main floor that the `listener` will hear when he is connected to the interpretation room. The user will be able to change this manually. |
+| role | 'interpreter' \| 'listener' |Indicates the role of the user that joins to the interpretation. We have two different roles: `interpreter` and `listener`. |
 | reusePin | boolean | If `true` the application will reuse the pin of the main floor to the interpretation room. The only requirement is that the PIN should be included in the URL. It isn't supported if the user introduce the PIN manually. |
+| interpreter.allowChangeDirection | boolean | If `true` the interpreter will be able to change the direction. He will be able to translate from the main floor to the interpretation room and the other way around. He will also be able to listen to the interpretation room. |
+| listener.mainFloorVolume | number | Float value between 0 and 1 that indicates the percentage of the main floor that the `listener` will hear when he is connected to the interpretation room. The user will be able to change this manually. |
+| listener.speakToInterpretationRoom | boolean | If enable, the listener will talk to the interpretation room instead of the main room. |
 | languages | {code: string, name: string}[] | The list of all the available languages. Each language will have two values: `code` and `name`. The `code` is the suffix that will be attached to the conference name. For example, if for the main conference we have `conferenceAlias=123` and `code=0033`, the system will create a new audio conference with `conferenceAlias=1230033`. The `name` is used for the UI elements, such as selectors.
 
 The parameter `allowChangeDirection` needs an additional explanation. With this parameter enabled, the interpreter can translate in both direction; from the main room to the interpretation room and the other way around. Here is a description of the behavior when the interpreter and listener are connected to the interpretation:
 
-- `allowChangeDirection = false`: In this case the interpreter only can translate from the main room to a interpretation room. Here are some details about each role:
+- `interpreter.allowChangeDirection = false && listener.speakToInterpretationRoom = false`: In this case the interpreter only can translate from the main room to a interpretation room. Here are some details about each role:
 
 
   | Device | Role | Main Room | Interpretation Room |
@@ -178,7 +179,7 @@ The parameter `allowChangeDirection` needs an additional explanation. With this 
 
   **Note:** The interpreter also have 100% volume in the Interpretation Room to detect if another interpreter joins to the same channel. In other case, both interpreters will start translating at the same time without being aware of the other.
 
-- `allowChangeDirection = true`: In this case the interpreter can change the direction of the translation. He can translate from the Main Room to the Interpretation Room and the other way around. In this case we have two other behavior based on the direction:
+- `interpreter.allowChangeDirection = true && listener.speakToInterpretationRoom = true`: In this case the interpreter can change the direction of the translation. He can translate from the Main Room to the Interpretation Room and the other way around. In this case we have two other behavior based on the direction:
   - **Main Room -> Interpretation Room:**
   
     | Direction | Role | Main Room | Interpretation Room |
