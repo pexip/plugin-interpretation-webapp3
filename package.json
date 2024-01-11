@@ -9,7 +9,9 @@
     "test": "jest --detectOpenHandles --silent",
     "lint": "eslint .",
     "interpreter": "ROLE=interpreter vite",
-    "listener": "ROLE=listener vite"
+    "listener": "ROLE=listener vite",
+    "interpreter-bidirectional": "ROLE=interpreter-bidirectional vite",
+    "listener-bidirectional": "ROLE=listener-bidirectional vite"
   },
   "keywords": [],
   "author": "",

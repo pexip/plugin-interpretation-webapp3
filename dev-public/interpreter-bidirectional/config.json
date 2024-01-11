@@ -1,9 +1,8 @@
 {
-  "role": "listener",
+  "role": "interpreter",
   "reusePin": true,
-  "listener": {
-    "mainFloorVolume": 0.2,
-    "speakToInterpretationRoom": false
+  "interpreter": {
+    "allowChangeDirection": true
   },
   "languages": [
     {

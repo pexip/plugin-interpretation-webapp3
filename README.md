@@ -9,6 +9,8 @@ In the plugin we have two roles that have to be deployed in two different brandi
 - **Interpreter:** User that translate what the people is saying in the main room.
 - **Listener:** User that can join to the interpretation room and listen to what the interpreter is saying.
 
+We have two additional brandings in case of a **bidirectional** scenario. This scenario is when the the interpreter can translate from the main room to the interpretation room and the other way around. 
+
 ## Deploy a Web App branding for development
 
 The first step is to deploy a two brandings in Infinity that we will use for testing each one of these roles.
@@ -24,6 +26,16 @@ For the brandings we will use the following parameters:
 
 - **Port:** 5174
 - **Branding path:** /listener
+  
+### Interpreter Bidirectional
+
+- **Port:** 5175
+- **Branding path:** /interpreter-bidirectional
+
+### Listener Bidirectional
+
+- **Port:** 5176
+- **Branding path:** /listener-bidirectional
 
 This way, one branding will read a plugin from `http://localhost:5173` (interpreter) and the other from the address `http://localhost:5174` (listener), so we don't need to upload the plugin every time we want to test it and we can test both roles at the same time.
 
@@ -46,16 +58,7 @@ Once the branding is deployed we need to configure some parameters:
 ```json
 {
   "infinityUrl": "https://192.168.1.101",
-  "interpreter": {
-    "port": 5173,
-    "brandingPath": "/interpreter",
-    "publicDir": "./public"
-  },
-  "listener": {
-    "port": 5174,
-    "brandingPath": "/listener",
-    "publicDir": "./dev-public/listener"
-  }
+  ...
 }
 ```
 
@@ -139,9 +142,14 @@ Here is an example of configuration:
 ```json
 {
   "role": "interpreter",
-  "allowChangeDirection": false,
-  "defaultInterpretationVolume": 0.8,
   "reusePin": true,
+  "interpreter": {
+    "allowChangeDirection": false
+  },
+  "listener": {
+    "mainFloorVolume": 0.2,
+    "speakToInterpretationRoom": false
+  },
   "languages": [
     {
       "code": "0033",
@@ -151,8 +159,7 @@ Here is an example of configuration:
       "code": "0034",
       "name": "spanish"
     }
-  ],
-  "allowChangeDirection": true
+  ]
 }
 ```
 
