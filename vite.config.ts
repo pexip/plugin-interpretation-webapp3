@@ -9,8 +9,19 @@ const role = process.env.ROLE
 
 let config = viteConfig.interpreter
 
-if (role === 'listener') {
-  config = viteConfig.listener
+switch (role) {
+  case 'listener': {
+    config = viteConfig.listener
+    break
+  }
+  case 'interpreter-bidirectional': {
+    config = viteConfig.interpreterBidirectional
+    break
+  }
+  case 'listener-bidirectional': {
+    config = viteConfig.listenerBidirectional
+    break
+  }
 }
 
 export default defineConfig({
@@ -20,7 +31,6 @@ export default defineConfig({
   },
   publicDir: config.publicDir,
   server: {
-    https: true,
     open: config.brandingPath + '/',
     port: config.port,
     proxy: {

@@ -1,0 +1,17 @@
+{
+  "role": "interpreter",
+  "reusePin": true,
+  "interpreter": {
+    "allowChangeDirection": false
+  },
+  "languages": [
+    {
+      "code": "0033",
+      "name": "french"
+    },
+    {
+      "code": "0034",
+      "name": "spanish"
+    }
+  ]
+}

@@ -1,44 +1,36 @@
-import { showInterpreterForm } from './forms'
-import { Interpretation } from './interpretation'
 import { getPlugin } from './plugin'
-import { showDisconnectPrompt } from './prompts'
-import { isSameDomain } from './utils'
-
+import { showInterpreterForm } from './forms'
 import type { Button, ToolbarButtonPayload } from '@pexip/plugin-api'
+import { getInterpretationContext } from './interpretationContext'
 
 let button: Button<'toolbar'>
-
-const tooltipActive = 'Join interpretation'
-const tooltipInactive = 'Leave interpretation'
 
 const buttonPayload: ToolbarButtonPayload = {
   position: 'toolbar',
   icon: 'IconSupport',
-  tooltip: tooltipActive,
+  tooltip: 'Interpretation',
   roles: ['chair', 'guest']
 }
 
 export const initializeButton = async (): Promise<void> => {
   const plugin = getPlugin()
   button = await plugin.ui.addButton(buttonPayload)
-  button.onClick.add(handleOnClick)
+  button.onClick.add(handleClick)
 }
 
 export const setButtonActive = async (active: boolean): Promise<void> => {
   await button.update(Object.assign(buttonPayload, {
-    isActive: active,
-    tooltip: active ? tooltipActive : tooltipInactive
+    isActive: active
   }))
 }
 
-const handleOnClick = async (): Promise<void> => {
-  if (isSameDomain()) {
-    if (Interpretation.getCurrentLanguage() != null) {
-      await showDisconnectPrompt()
-    } else {
-      await showInterpreterForm()
-    }
+const handleClick = async (): Promise<void> => {
+  const { minimize, state } = getInterpretationContext()
+  const { connected } = state
+
+  if (connected) {
+    minimize(false)
   } else {
-    await getPlugin().ui.showToast({ message: 'Interpretation plugin should be served from the Web App 3 domain.' })
+    await showInterpreterForm()
   }
 }

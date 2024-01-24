@@ -1,10 +1,17 @@
 import { config } from './config'
+import { capitalizeFirstLetter } from './utils'
 
-export interface Language {
-  code: string
-  name: string
-}
+import type { Option } from './types/Option'
+import type { Language } from './types/Language'
 
 export const getLanguageByCode = (code: string): Language | undefined => {
   return config.languages.find((language) => language.code === code)
+}
+
+export const getLanguageOptions = (): Option[] => {
+  const options = config.languages.map((language) => ({
+    id: language.code,
+    label: capitalizeFirstLetter(language.name)
+  }))
+  return options
 }

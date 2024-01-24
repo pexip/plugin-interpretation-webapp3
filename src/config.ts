@@ -1,8 +1,16 @@
-import type { Language } from './language'
-import type { Role } from './role'
+import type { Language } from './types/Language'
+import type { Role } from './types/Role'
 
 interface Config {
   role: Role
+  reusePin: boolean
+  interpreter: {
+    allowChangeDirection: boolean
+  }
+  listener: {
+    mainFloorVolume: number
+    speakToInterpretationRoom: boolean
+  }
   languages: Language[]
 }
 

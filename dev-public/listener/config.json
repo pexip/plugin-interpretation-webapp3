@@ -1,5 +1,10 @@
 {
   "role": "listener",
+  "reusePin": true,
+  "listener": {
+    "mainFloorVolume": 0.2,
+    "speakToInterpretationRoom": false
+  },
   "languages": [
     {
       "code": "0033",

@@ -1,0 +1,21 @@
+{
+  "role": "listener",
+  "reusePin": true,
+  "interpreter": {
+    "allowChangeDirection": true
+  },
+  "listener": {
+    "mainFloorVolume": 0.2,
+    "speakToInterpretationRoom": true
+  },
+  "languages": [
+    {
+      "code": "0033",
+      "name": "french"
+    },
+    {
+      "code": "0034",
+      "name": "spanish"
+    }
+  ]
+}

@@ -20,6 +20,6 @@
     "#111A22"
   ],
   "plugins": [
-    {"src": "http://localhost:5173"}
+    {"src": "https://localhost:5173"}
   ]
 }
