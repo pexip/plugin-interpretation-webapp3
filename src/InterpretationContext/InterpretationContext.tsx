@@ -23,7 +23,9 @@ import { getMainConferenceAlias } from '../conference'
 import { MainRoom } from '../main-room'
 import { setButtonActive } from '../button'
 
-const InterpretationContext = createContext<InterpretationContextType | null>(null)
+const InterpretationContext = createContext<InterpretationContextType | null>(
+  null
+)
 
 export interface InterpretationContextType {
   setPin: (pin: string) => void
@@ -56,6 +58,7 @@ export const InterpretationContextProvider = (props: {
   const initialState: InterpretationState = {
     role: config.role,
     connected: false,
+    connecting: false,
     language: null,
     direction: Direction.MainRoomToInterpretation,
     muted: false,
@@ -140,20 +143,24 @@ export const InterpretationContextProvider = (props: {
   }
 
   const disconnect = async (): Promise<void> => {
+    dispatch({
+      type: InterpretationActionType.Disconnected
+    })
     await infinityClient.disconnect({ reason: 'User initiated disconnect' })
     audio.pause()
     MainRoom.setVolume(1)
     MainRoom.disableMute(false)
     MainRoom.setMute(state.muted)
     await setButtonActive(false)
-    dispatch({
-      type: InterpretationActionType.Disconnected
-    })
   }
 
-  const changeMediaDevice = async (constraints: MediaTrackConstraints): Promise<void> => {
-    if (state.connected &&
-      (state.role === Role.Interpreter || config.listener?.speakToInterpretationRoom)
+  const changeMediaDevice = async (
+    constraints: MediaTrackConstraints
+  ): Promise<void> => {
+    if (
+      state.connected &&
+      (state.role === Role.Interpreter ||
+        config.listener?.speakToInterpretationRoom)
     ) {
       stopStream(mediaStream)
       mediaStream = await getMediaStream(constraints)
@@ -206,7 +213,7 @@ export const InterpretationContextProvider = (props: {
 
   const changeVolume = (volume: number): void => {
     const mainRoomVolume = Math.min(2 * (1 - volume / 100), 1)
-    const interpretationVolume = Math.min(volume * 2 / 100, 1)
+    const interpretationVolume = Math.min((volume * 2) / 100, 1)
     MainRoom.setVolume(mainRoomVolume)
     audio.volume = interpretationVolume
     dispatch({
@@ -226,7 +233,9 @@ export const InterpretationContextProvider = (props: {
     })
   }
 
-  const getMediaStream = async (constraints?: MediaTrackConstraints): Promise<MediaStream> => {
+  const getMediaStream = async (
+    constraints?: MediaTrackConstraints
+  ): Promise<MediaStream> => {
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -238,14 +247,18 @@ export const InterpretationContextProvider = (props: {
     } catch (e) {
       console.error(e)
       const plugin = getPlugin()
-      await plugin.ui.showToast({ message: 'Interpretation cannot access the microphone' })
+      await plugin.ui.showToast({
+        message: 'Interpretation cannot access the microphone'
+      })
       throw e
     }
     return stream
   }
 
   const stopStream = (stream: MediaStream | undefined): void => {
-    stream?.getTracks().forEach((track) => { track.stop() })
+    stream?.getTracks().forEach((track) => {
+      track.stop()
+    })
   }
 
   const initializeInfinityClientSignals = (): InfinitySignals => {
@@ -254,6 +267,7 @@ export const InterpretationContextProvider = (props: {
     signals.onAuthenticatedWithConference.add(handleConnected)
     signals.onError.add(async (options) => {
       pin = null
+      dispatch({ type: InterpretationActionType.Disconnected })
       await showErrorPrompt(options)
     })
     return signals
@@ -261,11 +275,19 @@ export const InterpretationContextProvider = (props: {
 
   const initializeInfinityCallSignals = (): CallSignals => {
     const signals = createCallSignals([])
-    signals.onRemoteStream.add((stream) => { audio.srcObject = stream })
+    signals.onRemoteStream.add((stream) => {
+      audio.srcObject = stream
+    })
     return signals
   }
 
-  const handlePin = async ({ hasHostPin, hasGuestPin }: { hasHostPin: boolean, hasGuestPin: boolean }): Promise<void> => {
+  const handlePin = async ({
+    hasHostPin,
+    hasGuestPin
+  }: {
+    hasHostPin: boolean
+    hasGuestPin: boolean
+  }): Promise<void> => {
     const role = config.role
     if (role === Role.Interpreter && hasHostPin) {
       await showPinForm()
@@ -284,7 +306,8 @@ export const InterpretationContextProvider = (props: {
 
   const handleConnected = async (): Promise<void> => {
     const showListenerMuteButton = config.listener?.speakToInterpretationRoom
-    if (state.role === Role.Interpreter ||
+    if (
+      state.role === Role.Interpreter ||
       (state.role === Role.Listener && showListenerMuteButton)
     ) {
       if (MainRoom.isMuted()) {

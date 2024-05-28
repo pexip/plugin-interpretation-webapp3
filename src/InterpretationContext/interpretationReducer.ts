@@ -1,15 +1,22 @@
 import { Direction } from '../types/Direction'
 import type { Language } from '../types/Language'
-import { InterpretationActionType, type InterpretationAction } from './InterpretationAction'
+import {
+  InterpretationActionType,
+  type InterpretationAction
+} from './InterpretationAction'
 import type { InterpretationState } from './InterpretationState'
 
-export const interpretationReducer = (prevState: InterpretationState, action: InterpretationAction): InterpretationState => {
+export const interpretationReducer = (
+  prevState: InterpretationState,
+  action: InterpretationAction
+): InterpretationState => {
   switch (action.type) {
     case InterpretationActionType.Connecting: {
       const language: Language = action.body.language
       return {
         ...prevState,
         connected: false,
+        connecting: true,
         language,
         volume: 80,
         direction: Direction.MainRoomToInterpretation
@@ -18,13 +25,15 @@ export const interpretationReducer = (prevState: InterpretationState, action: In
     case InterpretationActionType.Connected: {
       return {
         ...prevState,
-        connected: true
+        connected: true,
+        connecting: false
       }
     }
     case InterpretationActionType.Disconnected: {
       return {
         ...prevState,
-        connected: false
+        connected: false,
+        connecting: false
       }
     }
     case InterpretationActionType.ChangedLanguage: {

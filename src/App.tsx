@@ -11,7 +11,7 @@ import { setInterpretationContext } from './interpretationContext'
 
 export const App = (): JSX.Element => {
   const interpretationContext = useInterpretationContext()
-  const { connected, minimized } = interpretationContext.state
+  const { connected, connecting, minimized } = interpretationContext.state
 
   useEffect(() => {
     const bootStrap = async (): Promise<void> => {
@@ -25,7 +25,9 @@ export const App = (): JSX.Element => {
       await initializeButton()
       initializeIFrame()
     }
-    bootStrap().catch((e) => { console.error(e) })
+    bootStrap().catch((e) => {
+      console.error(e)
+    })
   }, [])
 
   useEffect(() => {
@@ -33,11 +35,8 @@ export const App = (): JSX.Element => {
   }, [interpretationContext])
 
   return (
-    <div data-testid='App'>
-      {connected && !minimized
-        ? <Widget />
-        : null
-      }
+    <div data-testid="App">
+      {(connected || connecting) && !minimized ? <Widget /> : null}
     </div>
   )
 }

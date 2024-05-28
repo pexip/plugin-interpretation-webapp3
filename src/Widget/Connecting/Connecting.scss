@@ -1,0 +1,11 @@
+.Connecting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding: 3em 0;
+
+  .ConnectingText {
+    margin-bottom: 1em;
+  }
+}

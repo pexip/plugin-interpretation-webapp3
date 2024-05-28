@@ -11,17 +11,28 @@ interface AuthenticatedWithConferenceEvent {
 
 export const initializeEvents = (): void => {
   const plugin = getPlugin()
-  plugin.events.authenticatedWithConference.add(handleAuthenticatedWithConference)
+  plugin.events.authenticatedWithConference.add(
+    handleAuthenticatedWithConference
+  )
   plugin.events.me.add(handleMe)
   plugin.events.participants.add(handleParticipants)
   plugin.events.disconnected.add(handleDisconnected)
+  plugin.events.userInitiatedDisconnect.add(() => {
+    console.log('User initiated disconnect')
+    handleDisconnected()
+  })
 }
 
-const handleAuthenticatedWithConference = (event: AuthenticatedWithConferenceEvent): void => {
+const handleAuthenticatedWithConference = (
+  event: AuthenticatedWithConferenceEvent
+): void => {
   setMainConferenceAlias(event.conferenceAlias)
 }
 
-const handleMe = (event: { id: string, participant: InfinityParticipant }): void => {
+const handleMe = (event: {
+  id: string
+  participant: InfinityParticipant
+}): void => {
   setUser(event.participant)
 }
 
