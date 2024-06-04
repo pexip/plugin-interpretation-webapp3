@@ -4,8 +4,9 @@
         "es2021": true
     },
     "extends": [
-        "standard-with-typescript",
-        "plugin:react/recommended"
+        "love",
+        "plugin:react/recommended",
+        "prettier"
     ],
     "overrides": [{
         "files": [
@@ -21,8 +22,6 @@
     "plugins": [
         "react"
     ],
-    "rules": {
-    },
     "ignorePatterns": ["dist"],
     "settings": {
         "react": {
