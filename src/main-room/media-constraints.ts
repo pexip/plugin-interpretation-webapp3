@@ -2,9 +2,12 @@ import { getInterpretationContext } from '../interpretationContext'
 
 const audioInputKey = 'infinity-connect:audioInput'
 
-let mediaConstraints: MediaTrackConstraints
+let mediaConstraints: MediaTrackConstraints =
+  localStorage.getItem(audioInputKey) != null
+    ? JSON.parse(localStorage.getItem(audioInputKey) as unknown as string)
+    : undefined
 
-const getConstraints = (): MediaTrackConstraints => {
+const getConstraints = (): MediaTrackConstraints | undefined => {
   return mediaConstraints
 }
 
@@ -13,7 +16,9 @@ window.addEventListener('storage', (event: StorageEvent) => {
     if (event.newValue != null) {
       const constraints: MediaTrackConstraints = JSON.parse(event.newValue)
       mediaConstraints = constraints
-      getInterpretationContext().changeMediaDevice(constraints).catch((e) => { console.error(e) })
+      getInterpretationContext()
+        .changeMediaDevice(constraints)
+        .catch(console.error)
     }
   }
 })
